@@ -291,6 +291,7 @@ def dispatch_with_plan_and_fc(
         load_kw=load_tot,
         pv_kw=pv_tot,
         batt_charge_cap_kw=cap_bat_kw,
+        Pmin_kW=Pmin_W / 1000.0,
     )
     # ---- FC fuel cost (DKK) using your equivalent-price method ----
     # fc_cost_rate_dkk_per_h(P_fc_kw, price_ch3oh) returns DKK/h at that power

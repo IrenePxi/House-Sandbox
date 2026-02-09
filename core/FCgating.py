@@ -48,11 +48,13 @@ def apply_fc_feasibility_no_export(
     load_kw: pd.Series,
     pv_kw: pd.Series,
     batt_charge_cap_kw: pd.Series | None = None,
+    Pmin_kW: float = 0.0,
 ) -> pd.Series:
     """
     Clamp FC power so we never have 'extra power goes nowhere' (no export).
     Convention: load_kw and pv_kw are >=0.
     If batt_charge_cap_kw is provided, it represents extra absorption possible (>=0).
+    If Pmin_kW > 0, we enforce: if feasible < Pmin, then cmd=0.
     """
     p_ref = _as_series(p_fc_ref_kw, idx, "p_fc_ref_kw").clip(lower=0.0)
     load = _as_series(load_kw, idx, "load_kw").clip(lower=0.0)
@@ -66,7 +68,13 @@ def apply_fc_feasibility_no_export(
     net_demand = (load - pv).clip(lower=0.0)  # cannot be negative if no export
     p_max_feasible = net_demand + cap_bat
 
+    # First clamp to feasibility (no export)
     p_cmd = np.minimum(p_ref.values, p_max_feasible.values)
+    
+    # Then enforce Pmin (if feasible is too low, we must turn off)
+    if Pmin_kW > 1e-6:
+        p_cmd = np.where(p_cmd < Pmin_kW, 0.0, p_cmd)
+
     return pd.Series(p_cmd, index=idx, name="P_fc_cmd_kW")
 
 def apply_fc_soc_gate(
