@@ -16,19 +16,19 @@ def load_custom_css():
         display: none;
     }
 
-    /* Style radio buttons as text links for navigation */
-    [data-testid="stRadio"] {
+    /* Style radio buttons as text links for navigation (TARGETED) */
+    #nav-container [data-testid="stRadio"] {
         margin-top: 0.1rem !important;
     }
     
-    [data-testid="stRadio"] div[role="radiogroup"] {
+    #nav-container [data-testid="stRadio"] div[role="radiogroup"] {
         gap: 3rem !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
     }
     
-    [data-testid="stRadio"] label {
+    #nav-container [data-testid="stRadio"] label {
         background: transparent !important;
         border: none !important;
         padding: 0.5rem 0 !important;
@@ -38,7 +38,7 @@ def load_custom_css():
         align-items: center !important;
     }
     
-    [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
+    #nav-container [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
         color: #64748B !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
@@ -49,19 +49,19 @@ def load_custom_css():
     }
     
     /* Hover state */
-    [data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {
+    #nav-container [data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {
         color: #2563EB !important;
     }
     
     /* Active state */
-    [data-testid="stRadio"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+    #nav-container [data-testid="stRadio"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
         color: #111827 !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #2563EB !important;
     }
     
     /* Hide the radio input but keep it clickable via label association */
-    [data-testid="stRadio"] input[type="radio"] {
+    #nav-container [data-testid="stRadio"] input[type="radio"] {
         width: 0 !important;
         height: 0 !important;
         position: absolute !important;
@@ -69,7 +69,7 @@ def load_custom_css():
     }
     
     /* Hide the circular icon */
-    [data-testid="stRadio"] label > div:first-child {
+    #nav-container [data-testid="stRadio"] label > div:first-child {
         display: none !important;
     }
 

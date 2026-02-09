@@ -46,8 +46,8 @@ def render_header():
         except ValueError:
             current_index = 0
 
-        # Create the radio navigation
-        # Note: We do NOT use a 'key' here to ensure the 'index' always controls the widget
+        # Create a targeted container for CSS
+        st.markdown('<div id="nav-container">', unsafe_allow_html=True)
         page = st.radio(
             "Navigation", 
             pages,
@@ -55,6 +55,7 @@ def render_header():
             horizontal=True,
             label_visibility="collapsed"
         )
+        st.markdown('</div>', unsafe_allow_html=True)
         
         if page != st.session_state["active_page"]:
             st.session_state["active_page"] = page
