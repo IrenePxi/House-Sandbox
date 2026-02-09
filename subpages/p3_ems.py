@@ -558,7 +558,7 @@ def render_analysis_page():
         st.markdown("### System Optimization")
         st.info("Run a combined heat and power optimization to minimize costs and carbon intensity via smart dispatch of battery and FC (if enabled).")
         
-        if st.button("🚀 Run Global Optimization (60s Limit)", type="primary", width="stretch", key="go_run_btn"):
+        if st.button("🚀 Run Global Optimization", type="primary", width="stretch", key="go_run_btn"):
             # Initialize progress bar
             pbar = st.progress(0, text="Initializing optimization engine...")
             start_time = time.time()
