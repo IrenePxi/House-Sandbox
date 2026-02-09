@@ -1314,6 +1314,11 @@ def render_devices_page_house():
                     cfg = get_default_config(dev, cat)
                     cfg.update(overrides)
                     st.session_state["device_configs"][full_key] = cfg
+                
+                # 3. Clear widget states to force UI update
+                for k in list(st.session_state.keys()):
+                    if k.startswith("chk_"):
+                        del st.session_state[k]
 
         st.session_state["last_house_size"] = current_size
 
@@ -1361,6 +1366,11 @@ def render_devices_page_house():
                 cfg = get_default_config(dev, cat)
                 cfg.update(overrides)
                 st.session_state["device_configs"][full_key] = cfg
+            
+            # Clear widget states to force UI update
+            for k in list(st.session_state.keys()):
+                if k.startswith("chk_"):
+                    del st.session_state[k]
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
