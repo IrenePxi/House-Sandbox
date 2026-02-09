@@ -649,6 +649,17 @@ def render_analysis_page():
             r3.metric("PV Utilization", f"{float(k.get('pv_util_ems') or 0.0):.0f}%", delta=f"{float(k.get('pv_util_ems') or 0.0) - pv_util:+.0f}%")
             r4.metric("Total Cost", f"{float(k.get('cost_ems') or 0.0):.2f} DKK", delta=f"{float(k.get('cost_ems') or 0.0) - total_cost:+.2f}" if total_cost else None, delta_color="inverse")
 
+            if has_fc:
+                # Calculate FC Heat Metrics
+                q_avail = d.get("q_fc_avail_kw", pd.Series(0.0, index=idx)).sum() * dt_h
+                q_used = (d.get("q_dhw_used_kw", pd.Series(0.0, index=idx)) + d.get("q_fc_to_space_kw", pd.Series(0.0, index=idx))).sum() * dt_h
+                util_rate = (q_used / q_avail * 100.0) if q_avail > 0.1 else 0.0
+                
+                st.markdown("#### FC Heat Performance")
+                fc1, fc2 = st.columns(2)
+                fc1.metric("FC Heat Utilized", f"{q_used:.1f} kWh")
+                fc2.metric("Heat Utilization Rate", f"{util_rate:.1f}%")
+
             with st.container(border=True):
                 st.markdown("#### Optimized Dispatch Plan")
                 fig_dev = go.Figure()
