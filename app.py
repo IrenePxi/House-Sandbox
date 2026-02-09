@@ -35,13 +35,16 @@ def render_header():
         """, unsafe_allow_html=True)
     
     with col_nav:
-        # Use radio for navigation but style it to look like text links
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = "Market & Weather"
+        if "prev_active_page" not in st.session_state:
+            st.session_state["prev_active_page"] = st.session_state["active_page"]
         
-        # Sync the radio widget's state with the actual active page
-        st.session_state["page_nav"] = st.session_state["active_page"]
-        
+        # Detect if a button changed the page
+        if st.session_state["active_page"] != st.session_state["prev_active_page"]:
+            st.session_state["page_nav"] = st.session_state["active_page"]
+            st.session_state["prev_active_page"] = st.session_state["active_page"]
+
         page = st.radio(
             "nav",
             ["Market & Weather", "Devices & Layout", "Analysis"],
@@ -52,6 +55,7 @@ def render_header():
         
         if page != st.session_state.get("active_page"):
             st.session_state["active_page"] = page
+            st.session_state["prev_active_page"] = page
             st.rerun()
 
     with col_prof:
