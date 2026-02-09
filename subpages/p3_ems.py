@@ -16,7 +16,7 @@ from services.P3_ems_service import (
     dispatch_with_plan_and_fc,
     compute_kpis_from_dispatch,
 )
-from services.P3_ems_globalopt_service import solve_stepA_relaxed_global_opt, stepB_project_real_thermal,solve_stepC_grid_batt_with_fixed_fc
+from services.P3_ems_globalopt_service import solve_stepA_relaxed_global_opt, stepB_project_real_thermal, solve_stepC_grid_batt_with_fixed_fc, solve_stepA_relaxed_lp
 
 from services.P2_devicesimulation_service import simulate_device,simulate_dhw_with_extra_debug, simulate_space_heat_shared_debug
 
@@ -583,37 +583,30 @@ def render_analysis_page():
                 # internal function to run in thread
                 def _run_optimization_task():
                     if is_heuristic:
-                         # --- HEURISTIC MODE ---
-                        plan_df = compute_auto_battery_plan(
-                            idx=idx, load_tot=load0, pv_tot=pv_tot, ps=ps, cs=cs,
-                            batt_cfg=batt_cfg if has_battery else {}, w_cost=1.0
+                         # --- HEURISTIC MODE (Relaxed LP) ---
+                        # Step A: Relaxed LP (Fast, no binaries, penalty for ramping)
+                        _A = solve_stepA_relaxed_lp(
+                            idx=idx, load_nonthermal_kw=p_load_nonthermal, pv_avail_kw=pv_tot, price_el=ps, tout_c=tout,
+                            dhw_draw_th_kw=Q_draw_th.reindex(idx).fillna(0.0), leisure_el_kw=p_thermal_leisure_el,
+                            batt_cfg=batt_cfg if has_battery else None, fc_cfg=fc_cfg if has_fc else None,
+                            space_cfg=dict(cfgs.get("thermal:space_heat", {})), dhw_cfg=dict(cfgs.get("thermal:dhw", {})),
+                            dt_h=dt_h, enable_fc=has_fc, enable_batt=has_battery,
                         )
+
+                        # Step B: Thermal Projection (same as Global)
+                        _B = stepB_project_real_thermal(idx=idx, context=context, cfgs=cfgs, simulate_device_fn=simulate_device, simulate_dhw_with_extra_debug_fn=simulate_dhw_with_extra_debug, fc_power_kw=_A["p_fc_kw"], fc_cfg=fc_cfg or {})
+                        _load1 = load0.copy().sub(p_thermal_dhw_el, fill_value=0.0).add(_B["p_dhw_el_kw"], fill_value=0.0).sub(p_thermal_space_el, fill_value=0.0).add(_B["p_space_el_kw"], fill_value=0.0).clip(lower=0.0)
+
+                        # Step C: Final Dispatch (same as Global)
+                        _C = solve_stepC_grid_batt_with_fixed_fc(idx=idx, load_kw=_load1, pv_avail_kw=pv_tot, p_fc_kw=_A["p_fc_kw"], price_el=ps, batt_cfg=batt_cfg if has_battery else None, dt_h=dt_h, objective="cost", enforce_end_soc="eq")
+
+                        # Pack results (Reuse Global packing logic)
+                        dispatch = dict(_C)
+                        dispatch.update({"p_fc_cmd_kw": _A["p_fc_kw"], "q_fc_avail_kw": _B["q_fc_avail_kw"], "q_dhw_used_kw": _B["q_dhw_used_kw"], "q_fc_to_space_kw": _B["q_to_space_kw"], "load1_kw": _load1})
+                        dispatch["P_by_device_kw"] = {"Optimized Load": _load1, "PV Used": _C["pv_used_kw"], "Battery": _C["p_bat_kw"], "Grid Import": _C["grid_import_kw"], "FC Generation": _A["p_fc_kw"]}
                         
-                        # run the dispatch wrapper (already defined in this file)
-                        dispatch = run_fc_heat_thermal_and_battery_dispatch(
-                            idx=idx, context=context, cfgs=cfgs, batt_cfg=batt_cfg, fc_cfg=fc_cfg,
-                            plan_df=plan_df, dt_h=dt_h, load0=load0, pv_tot=pv_tot,
-                            p_thermal_dhw_el=p_thermal_dhw_el, p_thermal_space_el=p_thermal_space_el,
-                            ps=ps, Q_draw_th=Q_draw_th,
-                            dispatch_with_plan_and_fc=dispatch_with_plan_and_fc,
-                            dispatch_with_plan=dispatch_with_plan,
-                            simulate_dhw_with_extra_debug=simulate_dhw_with_extra_debug,
-                            simulate_space_heat_shared_debug=simulate_space_heat_shared_debug,
-                            DeviceConfig=DeviceConfig
-                        )
+                        kpis = compute_kpis_from_dispatch(idx=idx, pv_tot=pv_tot, grid_import_kw=_C["grid_import_kw"], pv_unused_kw=_C["pv_unused_kw"], dt_h=dt_h, total_cost_baseline=total_cost, total_co2_baseline_kg=total_co2_grid_kg, ps=ps, cs=cs, p_fc_kw=_A["p_fc_kw"], fc_cfg=fc_cfg if has_fc else None, cost_fc_dkk=_C.get("fc_cost_dkk"))
                         
-                        # Compute KPIs (wrapper needs p_fc_kw key alignment or pass explicitly)
-                        # The heuristic dispatch returns 'p_fc_cmd_kw'
-                        kpis = compute_kpis_from_dispatch(
-                            idx=idx, pv_tot=pv_tot, 
-                            grid_import_kw=dispatch["grid_import_kw"], 
-                            pv_unused_kw=dispatch["pv_unused_kw"], 
-                            dt_h=dt_h, total_cost_baseline=total_cost, total_co2_baseline_kg=total_co2_grid_kg, 
-                            ps=ps, cs=cs, 
-                            p_fc_kw=dispatch.get("p_fc_cmd_kw"), 
-                            fc_cfg=fc_cfg if has_fc else None, 
-                            cost_fc_dkk=dispatch.get("fc_cost_dkk")
-                        )
                         return dispatch, kpis
 
                     else:

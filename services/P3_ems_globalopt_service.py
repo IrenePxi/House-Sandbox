@@ -965,3 +965,211 @@ def solve_stepC_grid_batt_with_fixed_fc(
         "dump_kw": pd.Series(dump, index=idx, name="dump_kw"),
         "soc_end_pct": soc_end_pct,
     }
+
+def solve_stepA_relaxed_lp(
+    *,
+    idx: pd.DatetimeIndex,
+    load_nonthermal_kw: pd.Series,
+    pv_avail_kw: pd.Series,
+    price_el: pd.Series | None,
+    tout_c: pd.Series,
+    dhw_draw_th_kw: pd.Series | None = None,
+    leisure_el_kw: pd.Series | None = None,
+    batt_cfg: dict | None = None,
+    fc_cfg: dict | None = None,
+    space_cfg: dict | None = None,
+    dhw_cfg: dict | None = None,
+    dt_h: float = 1.0/60.0,
+    enable_fc: bool = True,
+    enable_batt: bool = True,
+) -> dict:
+    """
+    Relaxed LP version of Step A.
+    - No binary variables (solves in seconds).
+    - Fuel Cell: Continuous 0..P_max, penalized for rapid changes (ramp).
+    - Used for "Heuristic / Fast" mode on Cloud.
+    """
+    if _HAS_PULP:
+        import pulp
+    else:
+        raise RuntimeError("PuLP is required for relaxed LP solver.")
+
+    n = len(idx)
+    batt_cfg = batt_cfg or {}
+    fc_cfg = normalize_fc_cfg(fc_cfg)
+    space_cfg = space_cfg or {}
+    dhw_cfg = dhw_cfg or {}
+
+    enable_fc = bool(enable_fc) and (fc_cfg is not None)
+    enable_batt = bool(enable_batt) and (batt_cfg is not None) and float(batt_cfg.get("E_kWh", 0.0)) > 0.0
+
+    # Inputs
+    L = _as_series(load_nonthermal_kw, idx, "load_nonthermal_kw", 0.0).clip(lower=0.0)
+    PV = _as_series(pv_avail_kw, idx, "pv_avail_kw", 0.0).clip(lower=0.0)
+    Tout = _as_series(tout_c, idx, "Tout_C", 5.0)
+    c_el = _as_series(price_el, idx, "price_el", 0.0).clip(lower=0.0) if price_el is not None else pd.Series(0.0, index=idx)
+    Q_dhw_use = _as_series(dhw_draw_th_kw, idx, "dhw_draw_th_kw", 0.0).clip(lower=0.0)
+    P_leisure = _as_series(leisure_el_kw, idx, "p_leisure_el_kw", 0.0).clip(lower=0.0)
+
+    # Params
+    # Battery
+    if enable_batt:
+        E_kWh = float(batt_cfg.get("E_kWh", 0.0))
+        soc0 = (float(batt_cfg.get("soc_init", 60.0))/100.0) * E_kWh
+        soc_min = (float(batt_cfg.get("soc_min", 10.0))/100.0) * E_kWh
+        soc_max = (float(batt_cfg.get("soc_max", 100.0))/100.0) * E_kWh
+        P_ch_max = float(batt_cfg.get("P_ch_max_kW", 0.0))
+        P_dis_max = float(batt_cfg.get("P_dis_max_kW", 0.0))
+        eta_ch = float(batt_cfg.get("eta_ch", 1.0))
+        eta_dis = float(batt_cfg.get("eta_dis", 1.0))
+    
+    # FC
+    if enable_fc:
+        P_fc_max = float(fc_cfg["Prated_W"]) / 1000.0
+        # Ignore Pmin for LP to avoid binaries, penalty handles "on/off" preference roughly
+        price_ch3oh = float(fc_cfg.get("price_ch3oh", 0.0))
+        # Penalty weight for ramping (DKK per kW change)
+        # Empirical: 0.1 DKK/kW change discourages jitter without blocking smooth ramps
+        ramp_penalty_weight = 0.05 
+    
+    # Thermal
+    t_in_min = float(space_cfg.get("t_min_c", 20.0))
+    t_in_max = float(space_cfg.get("t_max_c", 22.0))
+    UA = float(space_cfg.get("ua_kw_per_c", 0.25))
+    Cth = float(space_cfg.get("C_th_kwh_per_c", 3.0))
+    Ti0 = float(space_cfg.get("Ti0_c", 0.5*(t_in_min+t_in_max)))
+    Q_sp_hp_max = float(space_cfg.get("hp_q_th_kw", 8.0))
+    Q_sp_eh_max = float(space_cfg.get("eh_q_th_kw", 6.0))
+
+    tout_vals = Tout.to_numpy(dtype=float)
+    cop_sp = np.clip(2.0 + (tout_vals + 7.0) * (1.0/14.0), 1.4, 3.8)
+
+    t_tank_min = float(dhw_cfg.get("t_min_c", 45.0))
+    t_tank_max = float(dhw_cfg.get("t_max_c", 55.0))
+    Ttank0 = float(dhw_cfg.get("T0_c", 0.5*(t_tank_min+t_tank_max)))
+    C_tank = float(dhw_cfg.get("C_th_kwh_per_c", 6.0))
+    UA_tank = float(dhw_cfg.get("ua_kw_per_c", 0.08))
+    T_amb = float(dhw_cfg.get("T_amb_c", 21.0))
+    Q_dhw_hp_max = float(dhw_cfg.get("hp_q_th_kw", 1.5))
+    Q_dhw_eh_max = float(dhw_cfg.get("eh_q_th_kw", 2.0))
+    cop_dhw_val = float(dhw_cfg.get("cop_dhw", 2.5))
+
+    # --- PROBLEM ---
+    prob = pulp.LpProblem("StepA_LP_Relaxed", pulp.LpMinimize)
+
+    # Vars
+    p_grid = [pulp.LpVariable(f"pg_{t}", lowBound=0) for t in range(n)]
+    p_pv_used = [pulp.LpVariable(f"ppv_{t}", lowBound=0) for t in range(n)]
+    
+    # Battery
+    if enable_batt:
+        p_ch = [pulp.LpVariable(f"pch_{t}", lowBound=0, upBound=P_ch_max) for t in range(n)]
+        p_dis = [pulp.LpVariable(f"pdis_{t}", lowBound=0, upBound=P_dis_max) for t in range(n)]
+        soc = [pulp.LpVariable(f"soc_{t}", lowBound=soc_min, upBound=soc_max) for t in range(n)]
+    
+    # FC (Continuous)
+    if enable_fc:
+        p_fc = [pulp.LpVariable(f"pfc_{t}", lowBound=0, upBound=P_fc_max) for t in range(n)]
+        # Ramping aux vars for Abs value: ramp_pos[t] >= (p_fc[t] - p_fc[t-1]), ramp_pos >= -(...)
+        ramp_abs = [pulp.LpVariable(f"ramp_{t}", lowBound=0) for t in range(n)]
+    
+    # Thermal & Loads
+    Ti = [pulp.LpVariable(f"Ti_{t}", lowBound=t_in_min, upBound=t_in_max) for t in range(n)]
+    Ttank = [pulp.LpVariable(f"Ttank_{t}", lowBound=t_tank_min, upBound=t_tank_max) for t in range(n)]
+    
+    q_sp_hp = [pulp.LpVariable(f"qshp_{t}", lowBound=0, upBound=Q_sp_hp_max) for t in range(n)]
+    q_sp_eh = [pulp.LpVariable(f"qseh_{t}", lowBound=0, upBound=Q_sp_eh_max) for t in range(n)]
+    q_dhw_hp = [pulp.LpVariable(f"qdhp_{t}", lowBound=0, upBound=Q_dhw_hp_max) for t in range(n)]
+    q_dhw_eh = [pulp.LpVariable(f"qdeh_{t}", lowBound=0, upBound=Q_dhw_eh_max) for t in range(n)]
+
+    # Objective Terms
+    obj_terms = []
+
+    for t in range(n):
+        # 1. Grid Cost
+        obj_terms.append(p_grid[t] * float(c_el.iloc[t]) * dt_h)
+        
+        # 2. FC Fuel Cost (Linear approx approx 2 DKK/kWh for methanol e.g.)
+        # cost_rate ~ (P_fc / efficiency) * price_fuel. 
+        # Simplified: 2.0 * P_fc * price_ch3oh (approx)
+        # Better: use the helper, but we need linear coefficient.
+        # fc_cost_rate_dkk_per_h is non-linear. Linear approx: P_fc * k.
+        # k ~ (1/0.45 electrical efficiency) * price_per_kwh_fuel
+        # Let's use a safe proxy: P_fc * 2.5 * price_ch3oh
+        if enable_fc and price_ch3oh > 0:
+             k_fuel = 2.2 * price_ch3oh # approx 45% eff
+             obj_terms.append(p_fc[t] * k_fuel * dt_h)
+        
+        # 3. Ramping Penalty
+        if enable_fc:
+             obj_terms.append(ramp_abs[t] * ramp_penalty_weight)
+
+        # Constraints
+        # Balance: Grid + PV + BatDis + FC = Load + BatCh + ThermEl
+        supp = p_grid[t] + p_pv_used[t]
+        if enable_batt: supp += p_dis[t]
+        if enable_fc: supp += p_fc[t]
+        
+        # Thermal Electric Load
+        p_sp = (q_sp_hp[t] * (1.0/cop_sp[t])) + q_sp_eh[t]
+        p_dhw = (q_dhw_hp[t] * (1.0/cop_dhw_val)) + q_dhw_eh[t]
+        p_leisure = float(P_leisure.iloc[t])
+
+        cons = float(L.iloc[t]) + p_sp + p_dhw + p_leisure
+        if enable_batt: cons += p_ch[t]
+
+        prob += supp == cons, f"bal_{t}"
+        prob += p_pv_used[t] <= float(PV.iloc[t]), f"pv_{t}"
+
+        # Battery Dynamics
+        if enable_batt:
+            term = (eta_ch * p_ch[t] - (1.0/eta_dis) * p_dis[t]) * dt_h
+            if t == 0:
+                prob += soc[t] == soc0 + term, "soc0"
+            else:
+                prob += soc[t] == soc[t-1] + term, f"soc_{t}"
+        
+        # FC Ramping
+        if enable_fc:
+            if t == 0:
+                 # assume start from 0
+                 diff = p_fc[t]
+            else:
+                 diff = p_fc[t] - p_fc[t-1]
+            
+            prob += ramp_abs[t] >= diff, f"ramp_pos_{t}"
+            prob += ramp_abs[t] >= -diff, f"ramp_neg_{t}"
+
+        # Thermal Dynamics (Space)
+        curr_q = q_sp_hp[t] + q_sp_eh[t] 
+        prev_Ti = Ti[t-1] if t > 0 else Ti0
+        
+        # Ti[t] * (1 + dt_h*UA/Cth) - (dt_h/Cth)*curr_q == prev_Ti + (dt_h*UA/Cth)*Tout[t]
+        lhs = Ti[t] * (1 + dt_h*UA/Cth) - (dt_h/Cth)*curr_q
+        rhs = prev_Ti + (dt_h*UA/Cth)*float(Tout.iloc[t])
+        prob += lhs == rhs, f"temp_sp_{t}"
+
+        # Thermal Dynamics (DHW)
+        curr_q_dhw = q_dhw_hp[t] + q_dhw_eh[t] 
+        prev_Tank = Ttank[t-1] if t > 0 else Ttank0
+        
+        lhs_dhw = Ttank[t] * (1 + dt_h*UA_tank/C_tank) - (dt_h/C_tank)*curr_q_dhw
+        rhs_dhw = prev_Tank + (dt_h*UA_tank/C_tank)*T_amb - (dt_h/C_tank)*float(Q_dhw_use.iloc[t])
+        prob += lhs_dhw == rhs_dhw, f"temp_dhw_{t}"
+
+    # Solve
+    prob += pulp.lpSum(obj_terms)
+    
+    # Use optimized solver (HiGHS preferred)
+    solver = _get_configured_pulp_solver()
+    prob.solve(solver)
+
+    # Extract results
+    def _get(v): return pulp.value(v) if v is not None else 0.0
+
+    res_p_fc = pd.Series([_get(p_fc[t]) for t in range(n)] if enable_fc else 0.0, index=idx, name="P_fc_kw")
+    
+    return {
+        "p_fc_kw": res_p_fc,
+        "status": "LP_Relaxed",
+    }
