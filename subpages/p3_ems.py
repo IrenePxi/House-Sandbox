@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import time as _time
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 from models.schemas import DeviceConfig  
 
@@ -559,6 +561,8 @@ def render_analysis_page():
         if st.button("🚀 Run Global Optimization", type="primary", width="stretch", key="go_run_btn"):
             # Initialize progress bar
             pbar = st.progress(0, text="Initializing optimization engine...")
+            start_time = time.time()
+            estimated_duration = 70.0 # 60s step 1 + 10s others
             
             try:
                 tout = st.session_state.get("temp_daily")
@@ -567,27 +571,49 @@ def render_analysis_page():
                     tout = tout.reindex(idx, method="nearest").ffill().bfill()
                 else: tout = pd.Series(10.0, index=idx)
 
-                # --- STEP 1: Global MILP ---
-                pbar.progress(10, text="Step 1/3: Global Optimization (this takes ~60s)...")
-                A = solve_stepA_relaxed_global_opt(
-                    idx=idx, load_nonthermal_kw=p_load_nonthermal, pv_avail_kw=pv_tot, price_el=ps, tout_c=tout,
-                    dhw_draw_th_kw=Q_draw_th.reindex(idx).fillna(0.0), leisure_el_kw=p_thermal_leisure_el,
-                    batt_cfg=batt_cfg if has_battery else None, fc_cfg=fc_cfg if has_fc else None,
-                    space_cfg=dict(cfgs.get("thermal:space_heat", {})), dhw_cfg=dict(cfgs.get("thermal:dhw", {})),
-                    dt_h=dt_h, enable_fc=has_fc, enable_batt=has_battery,
-                )
+                # internal function to run in thread
+                def _run_optimization_task():
+                    # --- STEP 1: Global MILP ---
+                    _A = solve_stepA_relaxed_global_opt(
+                        idx=idx, load_nonthermal_kw=p_load_nonthermal, pv_avail_kw=pv_tot, price_el=ps, tout_c=tout,
+                        dhw_draw_th_kw=Q_draw_th.reindex(idx).fillna(0.0), leisure_el_kw=p_thermal_leisure_el,
+                        batt_cfg=batt_cfg if has_battery else None, fc_cfg=fc_cfg if has_fc else None,
+                        space_cfg=dict(cfgs.get("thermal:space_heat", {})), dhw_cfg=dict(cfgs.get("thermal:dhw", {})),
+                        dt_h=dt_h, enable_fc=has_fc, enable_batt=has_battery,
+                    )
 
-                # --- STEP 2: Thermal Projection ---
-                pbar.progress(50, text="Step 2/3: Thermal Projection...")
-                B = stepB_project_real_thermal(idx=idx, context=context, cfgs=cfgs, simulate_device_fn=simulate_device, simulate_dhw_with_extra_debug_fn=simulate_dhw_with_extra_debug, fc_power_kw=A["p_fc_kw"], fc_cfg=fc_cfg or {})
-                load1 = load0.copy().sub(p_thermal_dhw_el, fill_value=0.0).add(B["p_dhw_el_kw"], fill_value=0.0).sub(p_thermal_space_el, fill_value=0.0).add(B["p_space_el_kw"], fill_value=0.0).clip(lower=0.0)
+                    # --- STEP 2: Thermal Projection ---
+                    _B = stepB_project_real_thermal(idx=idx, context=context, cfgs=cfgs, simulate_device_fn=simulate_device, simulate_dhw_with_extra_debug_fn=simulate_dhw_with_extra_debug, fc_power_kw=_A["p_fc_kw"], fc_cfg=fc_cfg or {})
+                    _load1 = load0.copy().sub(p_thermal_dhw_el, fill_value=0.0).add(_B["p_dhw_el_kw"], fill_value=0.0).sub(p_thermal_space_el, fill_value=0.0).add(_B["p_space_el_kw"], fill_value=0.0).clip(lower=0.0)
 
-                # --- STEP 3: Final Dispatch ---
-                pbar.progress(75, text="Step 3/3: Grid & Battery Dispatch...")
-                C = solve_stepC_grid_batt_with_fixed_fc(idx=idx, load_kw=load1, pv_avail_kw=pv_tot, p_fc_kw=A["p_fc_kw"], price_el=ps, batt_cfg=batt_cfg if has_battery else None, dt_h=dt_h, objective="cost", enforce_end_soc="eq")
-                
+                    # --- STEP 3: Final Dispatch ---
+                    _C = solve_stepC_grid_batt_with_fixed_fc(idx=idx, load_kw=_load1, pv_avail_kw=pv_tot, p_fc_kw=_A["p_fc_kw"], price_el=ps, batt_cfg=batt_cfg if has_battery else None, dt_h=dt_h, objective="cost", enforce_end_soc="eq")
+                    
+                    return _A, _B, _C, _load1
+
+                # Execute in thread to allow UI updates
+                with ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(_run_optimization_task)
+                    
+                    while not future.done():
+                        elapsed = time.time() - start_time
+                        pct = min(int((elapsed / estimated_duration) * 100), 95)
+                        
+                        if elapsed < 60:
+                            status = f"Step 1/3: Global Optimization... ({elapsed:.1f}s)"
+                        elif elapsed < 65:
+                            status = f"Step 2/3: Thermal Projection... ({elapsed:.1f}s)"
+                        else:
+                            status = f"Step 3/3: Grid & Battery Dispatch... ({elapsed:.1f}s)"
+                        
+                        pbar.progress(pct, text=status)
+                        time.sleep(0.1)
+                    
+                    # outcome
+                    A, B, C, load1 = future.result()
+
                 # Finalizing
-                pbar.progress(90, text="Finalizing results...")
+                pbar.progress(100, text="Done!")
                 dispatch_go = dict(C)
                 dispatch_go.update({"p_fc_cmd_kw": A["p_fc_kw"], "q_fc_avail_kw": B["q_fc_avail_kw"], "q_dhw_used_kw": B["q_dhw_used_kw"], "q_fc_to_space_kw": B["q_to_space_kw"], "load1_kw": load1})
                 dispatch_go["P_by_device_kw"] = {"Optimized Load": load1, "PV Used": C["pv_used_kw"], "Battery": C["p_bat_kw"], "Grid Import": C["grid_import_kw"], "FC Generation": A["p_fc_kw"]}
@@ -595,7 +621,6 @@ def render_analysis_page():
                 kpis_go = compute_kpis_from_dispatch(idx=idx, pv_tot=pv_tot, grid_import_kw=C["grid_import_kw"], pv_unused_kw=C["pv_unused_kw"], dt_h=dt_h, total_cost_baseline=total_cost, total_co2_baseline_kg=total_co2_grid_kg, ps=ps, cs=cs, p_fc_kw=A["p_fc_kw"], fc_cfg=fc_cfg if has_fc else None, cost_fc_dkk=C.get("fc_cost_dkk"))
                 st.session_state["globalopt_last"] = {"dispatch": dispatch_go, "kpis": kpis_go}
                 
-                pbar.progress(100, text="Done!")
                 st.success("Global optimization finished.")
                 st.rerun()
             
