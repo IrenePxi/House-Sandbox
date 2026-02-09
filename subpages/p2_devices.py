@@ -1299,7 +1299,7 @@ def render_devices_page_house():
     current_res = hi["residents"]
 
     if prev_size != current_size:
-        # Detect actual change in size
+        st.session_state["last_house_size"] = current_size
         if prev_size is not None:
             # Apply Preset on change
             preset = HOUSE_TYPE_PRESETS.get(current_size)
@@ -1321,24 +1321,22 @@ def render_devices_page_house():
                         del st.session_state[k]
                 st.rerun()
 
-        st.session_state["last_house_size"] = current_size
-
-    elif prev_res != current_res and prev_res is not None:
-        # Resident count changed -> update sensitive defaults for enabled devices
-        for full_key, cfg in st.session_state.get("device_configs", {}).items():
-            cat, dev = full_key.split(":")
-            # Only update if it's a resident-sensitive device
-            if dev in ["dhw", "tv", "pc_desktop", "range_hood", "oven", "induction"]:
-                new_def = get_default_config(dev, cat)
-                if dev == "dhw":
-                    cfg["usage_level"] = new_def["usage_level"]
-                    cfg["volume_l"] = new_def["volume_l"]
-                elif dev in ["tv", "pc_desktop"]:
-                    cfg["num_devices"] = new_def["num_devices"]
-                elif dev in ["range_hood", "oven", "induction"]:
-                    cfg["duration_min"] = new_def["duration_min"]
-
-    st.session_state["last_house_residents"] = current_res
+    elif prev_res != current_res:
+        st.session_state["last_house_residents"] = current_res
+        if prev_res is not None:
+            # Resident count changed -> update sensitive defaults for enabled devices
+            for full_key, cfg in st.session_state.get("device_configs", {}).items():
+                cat, dev = full_key.split(":")
+                # Only update if it's a resident-sensitive device
+                if dev in ["dhw", "tv", "pc_desktop", "range_hood", "oven", "induction"]:
+                    new_def = get_default_config(dev, cat)
+                    if dev == "dhw":
+                        cfg["usage_level"] = new_def["usage_level"]
+                        cfg["volume_l"] = new_def["volume_l"]
+                    elif dev in ["tv", "pc_desktop"]:
+                        cfg["num_devices"] = new_def["num_devices"]
+                    elif dev in ["range_hood", "oven", "induction"]:
+                        cfg["duration_min"] = new_def["duration_min"]
 
     if "device_selection" not in st.session_state:
         preset = HOUSE_TYPE_PRESETS.get(current_size, HOUSE_TYPE_PRESETS["Medium house"])
