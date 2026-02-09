@@ -17,17 +17,16 @@ def load_custom_css():
     }
 
 
-    /* Style radio buttons as text links for navigation (TARGETED by Column) */
-    /* We target the radio button that is inside the header's navigation column. */
+    /* Style radio buttons as text links for navigation (TARGETED) */
     
     /* 1. HIDE THE RADIO INPUT AND CIRCLE COMPLETELY */
-    /* This targets the outer div of the radio option and hides the first child (the circle) */
-    div[row-widget="radio"] div[role="radiogroup"] > label > div:first-child {
+    /* Target via aria-label which comes from the widget label "HeaderNav" */
+    div[role="radiogroup"][aria-label="HeaderNav"] > label > div:first-child {
         display: none !important;
     }
     
     /* 2. LAYOUT THE TEXT LINKS HORIZONTALLY */
-    div[row-widget="radio"] div[role="radiogroup"] {
+    div[role="radiogroup"][aria-label="HeaderNav"] {
         gap: 2rem !important;
         display: flex !important;
         flex-direction: row !important;
@@ -36,7 +35,7 @@ def load_custom_css():
     }
 
     /* 3. STYLE THE TEXT (Normal State) */
-    div[row-widget="radio"] div[role="radiogroup"] label {
+    div[role="radiogroup"][aria-label="HeaderNav"] label {
         background: transparent !important;
         border: none !important;
         padding: 0.2rem 0 !important;
@@ -44,7 +43,7 @@ def load_custom_css():
         margin: 0 !important;
     }
     
-    div[row-widget="radio"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label div[data-testid="stMarkdownContainer"] p {
         color: #475569 !important; /* Slate-600 */
         font-size: 1rem !important;
         font-weight: 500 !important;
@@ -54,13 +53,13 @@ def load_custom_css():
     }
 
     /* 4. HOVER STATE (Underline) */
-    div[row-widget="radio"] div[role="radiogroup"] label:hover div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label:hover div[data-testid="stMarkdownContainer"] p {
         color: #2563EB !important; /* Blue-600 */
         border-bottom: 2px solid #2563EB !important;
     }
 
     /* 5. ACTIVE STATE (Bold + Underline) */
-    div[row-widget="radio"] div[role="radiogroup"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
         color: #0F172A !important; /* Slate-900 */
         font-weight: 700 !important;
         border-bottom: 2px solid #2563EB !important;
