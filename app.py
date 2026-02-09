@@ -40,26 +40,29 @@ def render_header():
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = pages[0]
         
+        # CLEANUP: Remove stale keys from previous segmented_control implementation
+        if "header_nav_seg" in st.session_state:
+            del st.session_state["header_nav_seg"]
+
         # Callback to sync state
         def sync_nav():
-            st.session_state["active_page"] = st.session_state["header_nav_seg"]
+            st.session_state["active_page"] = st.session_state["header_nav_radio"]
 
         # FORCE SYNC: If active_page changed externally (e.g. via Next button), update widget
-        # This ensures the nav bar always reflects the current page.
-        if "header_nav_seg" not in st.session_state:
-            st.session_state["header_nav_seg"] = st.session_state["active_page"]
-        elif st.session_state["header_nav_seg"] != st.session_state["active_page"]:
-            st.session_state["header_nav_seg"] = st.session_state["active_page"]
+        if "header_nav_radio" not in st.session_state:
+            st.session_state["header_nav_radio"] = st.session_state["active_page"]
+        elif st.session_state["header_nav_radio"] != st.session_state["active_page"]:
+            st.session_state["header_nav_radio"] = st.session_state["active_page"]
 
-        # Use native segmented control (Streamlit >= 1.40)
-        # This is natively styled, robust, and maintains state perfectly on Cloud
-        st.segmented_control(
-            "Navigation", 
+        # Use st.radio for the "text link" look, but with robust sync
+        # The key 'header_nav_radio' + on_change ensures Cloud reliability
+        st.radio(
+            "HeaderNav", 
             pages,
-            default=st.session_state["active_page"],
-            selection_mode="single",
+            index=pages.index(st.session_state["active_page"]),
+            horizontal=True,
             label_visibility="collapsed",
-            key="header_nav_seg",
+            key="header_nav_radio",
             on_change=sync_nav
         )
 

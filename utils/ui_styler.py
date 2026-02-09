@@ -17,6 +17,73 @@ def load_custom_css():
     }
 
 
+    /* Style radio buttons as text links for navigation (TARGETED by Column) */
+    /* We target the radio button that is inside the header's navigation column. 
+       Since we can't easily target the column by ID without more HTML hacking,
+       we will use a slightly broader selector that we know fits the header profile 
+       (horizontal, gap around 3rem) AND verify it works. */
+    
+    div[data-testid="stRadio"] > label[data-testid="stWidgetLabel"] {
+        display: none;
+    }
+
+    div[role="radiogroup"][aria-label="HeaderNav"], 
+    div[row-widget="radio"] { 
+        /* Fallback: if aria-label is missing, we try to target via structure if possible, 
+           but for now let's hope aria-label works OR we target via the specific unique key class if Streamlit generates one.
+           Actually, the most robust way without ID is to target the specific 'horizontal' radio at the top. */
+        margin-top: 0.2rem !important;
+    }
+
+    /* FORCE TEXT LINK STYLE on the HeaderNav */
+    /* We use the attribute selector again, but if it fails, the user sees standard buttons. 
+       Let's try to be deeper. */
+    div[role="radiogroup"][aria-label="HeaderNav"] {
+        gap: 3rem !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+    
+    div[role="radiogroup"][aria-label="HeaderNav"] label {
+        background: transparent !important;
+        border: none !important;
+        padding: 0.5rem 0 !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    div[role="radiogroup"][aria-label="HeaderNav"] label div[data-testid="stMarkdownContainer"] p {
+        color: #64748B !important;
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        padding-bottom: 2px !important;
+        border-bottom: 2px solid transparent !important;
+        transition: all 0.1s ease-in-out !important;
+    }
+    
+    /* Hover state */
+    div[role="radiogroup"][aria-label="HeaderNav"] label:hover div[data-testid="stMarkdownContainer"] p {
+        color: #2563EB !important;
+    }
+    
+    /* Active state */
+    div[role="radiogroup"][aria-label="HeaderNav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+        color: #111827 !important;
+        font-weight: 700 !important;
+        border-bottom: 2px solid #2563EB !important;
+    }
+    
+    /* Hide the radio input but keep it functional */
+    div[role="radiogroup"][aria-label="HeaderNav"] input[type="radio"],
+    div[role="radiogroup"][aria-label="HeaderNav"] label > div:first-child {
+        display: none !important;
+    }
+
+
     /* Top Navigation Styling */
     .stButton > button {
         border-radius: 8px;
