@@ -599,12 +599,7 @@ def render_analysis_page():
                         elapsed = time.time() - start_time
                         pct = min(int((elapsed / estimated_duration) * 100), 95)
                         
-                        if elapsed < 60:
-                            status = f"Step 1/3: Global Optimization... ({elapsed:.1f}s)"
-                        elif elapsed < 65:
-                            status = f"Step 2/3: Thermal Projection... ({elapsed:.1f}s)"
-                        else:
-                            status = f"Step 3/3: Grid & Battery Dispatch... ({elapsed:.1f}s)"
+                        status = f"Optimizing... ({pct}%)"
                         
                         pbar.progress(pct, text=status)
                         time.sleep(0.1)
