@@ -582,9 +582,19 @@ def solve_stepA_relaxed_global_opt(
 
         def _get_val(v, t): return v[t].X
     else:
-        if m.status != pulp.LpStatusOptimal:
+        # PuLP: Check status. If NotSolved (0), it might be a TimeLimit with a feasible solution.
+        # We allow Optimal (1) or NotSolved (0) if we can read values.
+        if m.status not in [pulp.LpStatusOptimal, pulp.LpStatusNotSolved]:
             raise RuntimeError(f"Step A failed. PuLP status: {pulp.LpStatus[m.status]}")
-        def _get_val(v, t): return pulp.value(v[t])
+        
+        # Double check if we actually have values
+        # If objective is None, then we really failed
+        if pulp.value(m.objective) is None:
+             raise RuntimeError(f"Step A failed (No solution found). PuLP status: {pulp.LpStatus[m.status]}")
+
+        def _get_val(v, t): 
+            val = pulp.value(v[t])
+            return float(val) if val is not None else 0.0
 
     out = {
         "p_grid_kw": pd.Series([_get_val(p_grid, t) for t in range(n)], index=idx, name="p_grid_kw"),
@@ -927,9 +937,15 @@ def solve_stepC_grid_batt_with_fixed_fc(
         # Use optimized solver config
         solver = _get_configured_pulp_solver()
         m.solve(solver)
-        if m.status != pulp.LpStatusOptimal:
+        if m.status not in [pulp.LpStatusOptimal, pulp.LpStatusNotSolved]:
             raise RuntimeError(f"Step C solve failed. PuLP status: {pulp.LpStatus[m.status]}")
-        def _get_val(v, t): return pulp.value(v[t])
+        
+        if pulp.value(m.objective) is None:
+             raise RuntimeError(f"Step C failed (No solution found). PuLP status: {pulp.LpStatus[m.status]}")
+
+        def _get_val(v, t): 
+            val = pulp.value(v[t])
+            return float(val) if val is not None else 0.0
 
     grid = np.array([_get_val(p_grid, t) for t in range(n)], dtype=float)
     pv_used = np.array([_get_val(p_pv, t) for t in range(n)], dtype=float)
