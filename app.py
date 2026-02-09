@@ -40,24 +40,26 @@ def render_header():
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = pages[0]
         
-        # Determine current index based on session state
-        try:
-            current_index = pages.index(st.session_state["active_page"])
-        except ValueError:
-            current_index = 0
-
         # Callback to sync state
         def sync_nav():
-            st.session_state["active_page"] = st.session_state["header_nav_radio"]
+            st.session_state["active_page"] = st.session_state["header_nav_seg"]
 
-        # Create the radio navigation with a unique key and callback
-        st.radio(
-            "HeaderNav", 
+        # FORCE SYNC: If active_page changed externally (e.g. via Next button), update widget
+        # This ensures the nav bar always reflects the current page.
+        if "header_nav_seg" not in st.session_state:
+            st.session_state["header_nav_seg"] = st.session_state["active_page"]
+        elif st.session_state["header_nav_seg"] != st.session_state["active_page"]:
+            st.session_state["header_nav_seg"] = st.session_state["active_page"]
+
+        # Use native segmented control (Streamlit >= 1.40)
+        # This is natively styled, robust, and maintains state perfectly on Cloud
+        st.segmented_control(
+            "Navigation", 
             pages,
-            index=current_index,
-            horizontal=True,
+            default=st.session_state["active_page"],
+            selection_mode="single",
             label_visibility="collapsed",
-            key="header_nav_radio",
+            key="header_nav_seg",
             on_change=sync_nav
         )
 

@@ -16,52 +16,6 @@ def load_custom_css():
         display: none;
     }
 
-    /* Style radio buttons as text links for navigation (TARGETED) */
-    div[role="radiogroup"][aria-label="HeaderNav"] {
-        gap: 3rem !important;
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        margin-top: 0.2rem !important;
-    }
-    
-    div[role="radiogroup"][aria-label="HeaderNav"] label {
-        background: transparent !important;
-        border: none !important;
-        padding: 0.5rem 0 !important;
-        cursor: pointer !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-    
-    div[role="radiogroup"][aria-label="HeaderNav"] label div[data-testid="stMarkdownContainer"] p {
-        color: #64748B !important;
-        font-size: 1.05rem !important;
-        font-weight: 500 !important;
-        margin: 0 !important;
-        padding-bottom: 2px !important;
-        border-bottom: 2px solid transparent !important;
-        transition: all 0.1s ease-in-out !important;
-    }
-    
-    /* Hover state */
-    div[role="radiogroup"][aria-label="HeaderNav"] label:hover div[data-testid="stMarkdownContainer"] p {
-        color: #2563EB !important;
-    }
-    
-    /* Active state */
-    div[role="radiogroup"][aria-label="HeaderNav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
-        color: #111827 !important;
-        font-weight: 700 !important;
-        border-bottom: 2px solid #2563EB !important;
-    }
-    
-    /* Hide the radio input but keep it functional */
-    div[role="radiogroup"][aria-label="HeaderNav"] input[type="radio"],
-    div[role="radiogroup"][aria-label="HeaderNav"] label > div:first-child {
-        display: none !important;
-    }
 
     /* Top Navigation Styling */
     .stButton > button {
