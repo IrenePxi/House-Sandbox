@@ -1,0 +1,158 @@
+<<<<<<< HEAD
+timestamp,event,occupation,location,session_id
+2026-01-07T12:07:36,start,Industry,Aalborg,016d28f3-4437-488b-bbc8-ce0d31740ae6
+2026-01-12T16:46:42,start,PhD student,Aalborg,599583e5-ee34-438e-9b3f-ba48aa9adfe5
+2026-01-12T17:07:04,start,Research assistant,Aalborg,bf5ce0df-f7db-466e-95a9-5ec8b724d51e
+2026-01-12T17:08:28,start,Research assistant,Aalborg,e50b2c79-d2a6-4f16-9e3e-058d9a170917
+2026-01-12T17:10:26,start,Postdoc,Aalborg,82a65446-dab4-42eb-923c-20e2be0b9b84
+2026-01-12T17:21:06,start,Research assistant,Aalborg,69f20c20-a482-49b2-afa2-e506aa34a0f1
+2026-01-13T09:50:17,start,Research assistant,Aalborg,73ada556-7924-4d25-84cd-e390d0cf9787
+2026-01-13T13:43:55,start,Master student,Aalborg,3764e7a7-41cd-4037-aade-07a11c8cdda6
+2026-01-13T13:45:13,start,PhD student,Aalborg,f0dc8943-f8e4-4d9a-be63-619d1ff6c519
+2026-01-13T14:36:31,start,Research assistant,Aalborg,beaa0cc4-daa0-465d-a5fe-ff4dc8aedf9a
+2026-01-13T14:56:11,start,Research assistant,Aalborg,9f182a86-328a-4ca2-a74e-b7a408d18739
+2026-01-14T09:49:57,start,PhD student,Aalborg,ec75b230-d8ca-4135-8492-12ce705dc236
+2026-01-14T10:12:59,start,Master student,Aalborg,e521b7f3-3015-44c7-8a0d-7f2595d86576
+2026-01-14T10:16:24,start,PhD student,Aalborg,9bb648de-0e91-4117-8fab-58eb2a5313db
+2026-01-14T10:22:54,start,PhD student,Aalborg,6d595dd8-69a6-44b3-9cdb-47b243f08d95
+2026-01-14T10:27:52,start,PhD student,Aalborg,3e22ba60-cd45-4098-9a3e-b2d8f09efed1
+2026-01-14T10:39:14,start,Master student,Aalborg,73909300-06ea-4277-a248-272c155912e2
+2026-01-14T11:07:40,start,Master student,Aalborg,d8715538-529c-498d-9b8c-7138082f999d
+2026-01-14T14:06:10,start,Research assistant,Aalborg,75c85afb-407b-4d20-b924-94c124d71ef9
+2026-01-14T14:07:39,start,Postdoc,Aalborg,d5626c76-435b-45ac-84ed-1f95f3556192
+2026-01-14T15:17:33,start,Master student,Aalborg,fe80e2f9-3c7e-46ea-be77-32d87f980c65
+2026-01-14T16:00:24,start,Master student,Aalborg,6a71c7ed-8680-482c-9b22-71a7218b76e7
+2026-01-14T16:05:24,start,Master student,Aalborg,0b75fce1-4ac0-4245-a95b-7518269c2328
+2026-01-14T16:47:41,start,Assistant Professor,Aalborg,4611d37e-27eb-402c-9dfb-8f16eef4d6cb
+2026-01-15T10:08:33,start,Research assistant,Aalborg,3ec295ec-7cfe-4645-afc6-7fefce099ae2
+2026-01-15T11:28:39,start,Postdoc,Aalborg,f8ed0649-291e-40b8-840c-b3a47ff0b9d9
+2026-01-15T11:29:26,start,Research assistant,Aalborg,fc3e6880-8ccf-4185-b5eb-468b8c9c82b7
+2026-01-15T11:32:49,start,Master student,Aalborg,9a58dd30-b6b7-4daa-b302-1c030a0ba769
+2026-01-15T14:20:51,start,Research assistant,Aalborg,a91780ea-d10d-42f3-b329-2cf322086a75
+2026-01-15T14:25:34,start,Research assistant,Aalborg,d38fd673-371d-4591-b0aa-3901bb96de6a
+2026-01-15T14:30:50,start,Postdoc,Aalborg,feebdf50-9743-4199-9289-fd37eefa1859
+2026-01-15T15:01:21,start,Assistant Professor,Aalborg,067ce9a8-b98b-462b-88af-e6d2822dafe9
+2026-01-15T15:05:19,start,PhD student,Aalborg,7dd6af49-ec0f-4570-b96f-a84a351f9d5d
+2026-01-15T15:37:58,start,Professor,Aalborg,7f651da1-cbf6-48e4-8fcb-bb63a2567da0
+2026-01-15T15:38:24,start,PhD student,Aalborg,a0969af4-9b65-43f0-b585-9e4dac66d615
+2026-01-16T10:25:51,start,PhD student,Aalborg,38bae3da-1ad0-4b68-80a8-80f3ef70a9b6
+2026-01-16T12:43:05,start,PhD student,Aalborg,9879a133-1d9a-4967-a6bf-c96fbe463eac
+2026-01-16T12:43:37,start,Research assistant,Aalborg,943d694b-2799-4dcb-9d43-4add1a7fb779
+2026-01-16T13:47:15,start,Master student,Aalborg,4bad7758-82cf-4be8-ade3-68e1462a43fa
+2026-01-16T13:56:04,start,Master student,Aalborg,5756bacf-2639-402a-89ea-32f34e7afc73
+2026-01-16T14:57:54,start,Professor,Aalborg,aad29ab8-558b-46f6-8f91-a60ea49d2a77
+2026-01-16T15:03:31,start,PhD student,Aalborg,f92b06e6-04a5-4dc2-ba5e-cac2221d4255
+2026-01-16T15:15:23,start,Postdoc,Aalborg,74f2f59b-c8aa-47cc-8290-7da3b0ba75d8
+2026-01-16T15:40:22,start,Postdoc,Aalborg,6b1245e5-db33-48db-93c3-985d30ee0a3f
+2026-01-16T16:28:20,start,Associate Professor,Aalborg,d69faee7-6027-47be-a4fd-578fa531bbca
+2026-01-16T16:31:48,start,Postdoc,Aalborg,096ef8e8-bd33-4e7b-bd0a-cc92d9b8e926
+2026-01-19T10:14:04,start,Master student,Aalborg,be47af11-c54c-419a-9a23-5d5b56d4437d
+2026-01-19T15:23:02,start,Research assistant,Aalborg,8dd649fd-bd1e-49fa-858c-a3c49d6bce4b
+2026-01-19T15:33:58,start,PhD student,Aalborg,b18e3aec-8215-4f89-b72f-837889f6c0d4
+2026-01-20T11:04:50,start,PhD student,Aalborg,42f3486d-6e30-460b-93ae-9c4a29380b62
+2026-01-20T13:16:56,start,Research assistant,Aalborg,e7d7bdc8-4c1f-4f5a-83df-3d3ff6f4b380
+2026-01-20T13:17:46,start,Master student,Aalborg,14339b29-bef9-45b9-9406-abe87cb6bef6
+2026-01-20T13:35:29,start,Master student,Aalborg,2f13bc49-0c70-43a8-8dcd-6895a4f16b15
+2026-01-20T17:03:37,start,Research assistant,Aalborg,6234b36f-94eb-4ead-918f-d371c747fd8f
+2026-01-20T17:53:01,start,Industry,Aalborg,55e3b6e9-194d-4c57-9208-9c72e9e5e3f1
+2026-01-21T09:56:33,start,PhD student,Aalborg,9e254254-e20a-4a65-bdb0-67b976f36e0d
+2026-01-22T10:06:32,start,Postdoc,Aalborg,6f422301-f299-4961-a5ac-a20801bc26a8
+2026-01-22T16:15:09,start,Postdoc,Aalborg,a8286dca-ab46-4f66-a0c8-e7a1de411021
+2026-01-23T13:48:15,start,Research assistant,Aalborg,12be8da9-df38-41bc-91ad-36119e86bf92
+2026-01-23T14:37:48,start,PhD student,Aalborg,f06ed8af-ef11-4fb1-8e0f-905d9393e856
+2026-01-23T14:38:09,start,Research assistant,Aalborg,4348fdb0-ee03-4a19-9733-3d8eaefa1660
+2026-01-23T17:02:03,start,Postdoc,Aalborg,d1ecbdd2-2d7b-4405-a572-ed08f7d40f98
+2026-01-23T17:07:10,start,Bachelor student,Aalborg,b48d5fc3-f132-450a-a07b-cfa67149f442
+2026-01-23T17:26:50,start,Master student,Aalborg,b8a0600b-cf60-476b-94d0-6a8f8ab30472
+2026-01-23T22:42:23,start,PhD student,Aalborg,54dd32b1-33e3-4283-ba82-e67068273636
+2026-01-23T23:56:21,start,PhD student,Aalborg,7fd10076-4d7f-4e55-ba5f-fea563a1e8a6
+2026-01-26T10:08:41,start,Research assistant,Aalborg,a53abef6-9512-4bba-8780-395a9e3e2c8b
+2026-01-26T11:24:56,start,Assistant Professor,Aalborg,7002ffad-487a-4a8c-8008-cfbd52213b99
+2026-01-26T16:40:04,start,Bachelor student,Aalborg,078c29cd-b60d-49a2-961e-eaface38afe1
+2026-01-27T12:18:18,start,Postdoc,Aalborg,b477e6f9-a8df-4f46-996b-604db1fc52b2
+2026-01-27T13:22:06,start,Postdoc,Aalborg,03ff4a01-e409-4096-9b62-e23096741f14
+2026-01-28T10:07:20,start,Master student,Aalborg,bd1be108-3848-4e7d-ae74-1e2261568bed
+2026-01-28T17:20:40,start,Research assistant,Aalborg,b7135d49-b27c-489c-8421-ad69db60442c
+2026-01-30T10:02:42,start,Associate Professor,Aalborg,d0b65b4d-a7e2-4d5d-94ab-a78c3fed43b8
+2026-02-02T10:50:54,start,Master student,Aalborg,1c7cca0f-2f7e-4a6e-8c8e-757bc0f50c82
+2026-02-02T11:15:00,start,Assistant Professor,Aalborg,ebd0c848-1cf8-44fc-a4ab-3a80812e810d
+2026-02-02T16:01:35,start,Research assistant,Aalborg,bb618cbd-57a9-4b59-b3a0-60917d4e9e7e
+2026-02-02T16:55:27,start,PhD student,Aalborg,a7093a9e-ea2a-4a32-94ed-921c8ff1ba4f
+2026-02-03T10:24:31,start,Research assistant,Aalborg,1d9c1e65-c2a0-49f6-be72-9272e3f031fd
+2026-02-03T10:40:28,start,Bachelor student,Aalborg,8a4cdcaf-cb7c-4c34-bf2e-ea7e5d29f0eb
+2026-02-03T11:22:23,start,Associate Professor,Aalborg,642e9945-b994-49ed-9a4e-8c2b06904008
+2026-02-06T11:36:00,start,PhD student,Aalborg,10021f33-3830-4c40-aef5-8a9bd921dec4
+2026-02-06T17:03:27,start,PhD student,Aalborg,b07d428b-eb24-4ce0-95ab-3f883196561f
+2026-02-06T17:11:20,start,PhD student,Aalborg,09661fa8-64af-4fa4-92f1-66182fc0f3bd
+2026-02-06T17:17:50,start,Student,Aalborg,ad3760ba-b2ce-4cae-94eb-8dbd33d61f69
+2026-02-06T17:19:07,start,Academic,Aalborg,d51c650a-c8dd-47b5-8aa4-b6e623367575
+2026-02-06T17:20:24,start,Student,Aalborg,4d120d8c-8539-4d50-bfa5-201fd1e7966e
+2026-02-06T17:22:57,start,Research assistant,Aalborg,9aa01ad1-f91c-4cee-b132-2944df845668
+2026-02-06T17:27:27,start,Assistant Professor,Aalborg,8694ccdc-6ec5-4d95-872f-a8b739ed943a
+2026-02-06T17:40:41,start,Student,Aalborg,d2d44d5a-fcaa-4c81-9dba-3bcef77874d6
+2026-02-06T17:44:08,start,Industry,Aalborg,0faa78cd-28b8-49e8-967f-91f8c21641a4
+2026-02-06T17:47:24,start,Others,Aalborg,0faa78cd-28b8-49e8-967f-91f8c21641a4
+2026-02-06T17:47:45,start,Academic employee,Aalborg,0faa78cd-28b8-49e8-967f-91f8c21641a4
+2026-02-06T17:48:04,start,Academic employee,Aalborg,3213c5d2-46de-4de8-8172-4a2da825ccd5
+2026-02-06T17:50:16,start,Academic employee,Aalborg,3213c5d2-46de-4de8-8172-4a2da825ccd5
+2026-02-06T17:52:05,start,Academic employee,Aalborg,b516a157-d702-4056-95c8-6a2110b99774
+2026-02-06T17:55:02,start,Student,Aalborg,68dc1439-93b1-4b09-8bf8-8a3edfde65e0
+2026-02-06T17:57:26,start,Academic employee,Aalborg,6ec637ae-b7e4-4066-bf9b-fccbb6981908
+2026-02-06T18:01:00,start,Academic employee,Aalborg,f91b6dc9-6eea-405d-93cb-57bf256478c5
+2026-02-06T18:03:19,start,Academic employee,Aalborg,b72fd265-e18c-4e51-8c99-6bfeaeba3d8e
+2026-02-06T18:04:58,start,Academic employee,Aalborg,9a25a838-8280-454f-b098-9a50885e65dc
+2026-02-06T18:07:09,start,Student,Aalborg,c92221da-1580-4db8-b16b-ad425637fa48
+2026-02-06T18:09:16,start,Academic employee,Aalborg,4e14f6ae-1397-4994-bdf0-95579985ada9
+2026-02-06T18:09:43,start,Academic employee,Aalborg,cd91badc-308b-4fe8-bae4-64ca1d413908
+2026-02-06T18:10:12,start,Academic employee,Aalborg,9e2a5654-de23-403a-b6f6-96c5dbab2079
+2026-02-06T18:12:27,start,Academic employee,Aalborg,3052e340-174e-4e2e-863f-71f09b70d0d8
+2026-02-06T18:13:59,start,Student,Aalborg,8cae1987-1a9e-4876-808d-31e69f2b71eb
+2026-02-06T18:16:16,start,Academic employee,Aalborg,d1a1dd59-1bb7-4a33-b4d8-30b3c8305e60
+2026-02-06T18:17:21,start,Academic employee,Aalborg,11495da3-8405-4db1-bb6c-0af23f932a7f
+2026-02-06T18:21:03,start,Academic employee,Aalborg,9bcbce7c-c09f-46ed-86ac-5c81e3622876
+2026-02-06T18:26:59,start,Academic employee,Aalborg,38b0cee8-c494-45d2-97e5-d9f39a4c6dc7
+2026-02-06T18:28:42,start,Academic employee,Aalborg,37f6077c-108d-4d76-be24-8bafc3bf9971
+2026-02-06T18:33:47,start,Academic employee,Aalborg,3bf16b74-df2f-480e-8e7a-8f9115c2173c
+2026-02-06T18:34:27,start,Student,Aalborg,18795fa3-e901-4fdb-875c-5598a483b55f
+2026-02-06T18:35:44,start,Academic employee,Aalborg,c17fa5b8-f8f6-4729-812c-2a5b5bd5889e
+2026-02-09T11:01:06,start,Academic employee,Aalborg,baac9c3b-277b-422d-87f8-13e4410e2bc6
+2026-02-09T12:25:20,start,Academic employee,Aalborg,bd0c1001-38b4-4b57-ab84-52fa4dcedc0e
+2026-02-09T12:37:41,start,Academic employee,Aalborg,d4e6eeea-a7f8-4dc5-8316-851cb28c4cf0
+2026-02-09T12:45:47,start,Academic employee,Aalborg,5aede774-aab7-4d29-a31d-601709465e52
+2026-02-09T12:50:02,start,Student,Aalborg,6a22f3a6-27dd-4ded-921c-7fcdfe6002ad
+2026-02-09T13:13:21,start,Academic employee,Aalborg,92fb1e9c-7c25-4127-badd-0ddce751cd43
+2026-02-09T13:13:58,start,Academic employee,Aalborg,e8aa6b8a-0964-4362-9f8a-c3293d8b761a
+2026-02-09T13:14:34,start,Academic employee,Aalborg,9816d7b5-f866-48e1-90e0-6f39e858e566
+2026-02-09T13:20:21,start,Academic employee,Aalborg,a40e1af6-0480-4b42-b0c5-99ce8b7050f4
+2026-02-09T13:22:57,start,Academic employee,Aalborg,f24ca8cc-5375-4731-9f6f-9ab4688d158a
+2026-02-09T13:29:45,start,Academic employee,Aalborg,73a58210-dffe-490a-894e-67612d230bee
+2026-02-09T13:30:01,analysis_reached,Academic employee,Aalborg,73a58210-dffe-490a-894e-67612d230bee
+2026-02-09T13:36:23,start,Academic employee,Aalborg,8fcc2f6e-9bc4-4925-a18b-22b38a9f6948
+2026-02-09T13:36:23,p1_reached,Academic employee,Aalborg,8fcc2f6e-9bc4-4925-a18b-22b38a9f6948
+2026-02-09T13:37:30,p2_reached,Academic employee,Aalborg,8fcc2f6e-9bc4-4925-a18b-22b38a9f6948
+2026-02-09T13:37:33,analysis_reached,Academic employee,Aalborg,8fcc2f6e-9bc4-4925-a18b-22b38a9f6948
+2026-02-09T13:40:52,start,Academic employee,Aalborg,8fcc2f6e-9bc4-4925-a18b-22b38a9f6948
+2026-02-09T13:43:10,start,Student,Aalborg,5557098c-b156-4b0e-9c93-9bdbc3ce31f9
+2026-02-09T13:43:10,p1_reached,Student,Aalborg,5557098c-b156-4b0e-9c93-9bdbc3ce31f9
+2026-02-09T13:43:13,p2_reached,Student,Aalborg,5557098c-b156-4b0e-9c93-9bdbc3ce31f9
+2026-02-09T13:43:20,analysis_reached,Student,Aalborg,5557098c-b156-4b0e-9c93-9bdbc3ce31f9
+2026-02-09T13:48:08,start,Student,Aalborg,32fe98c1-1efb-4f98-8861-094600495b75
+2026-02-09T13:48:08,p1_reached,Student,Aalborg,32fe98c1-1efb-4f98-8861-094600495b75
+2026-02-09T13:48:12,p2_reached,Student,Aalborg,32fe98c1-1efb-4f98-8861-094600495b75
+2026-02-09T13:48:16,analysis_reached,Student,Aalborg,32fe98c1-1efb-4f98-8861-094600495b75
+2026-02-09T13:50:42,start,Academic employee,Aalborg,94ed6567-7d3d-429a-9bc5-0e422b6f1cf4
+2026-02-09T13:50:42,p1_reached,Academic employee,Aalborg,94ed6567-7d3d-429a-9bc5-0e422b6f1cf4
+2026-02-09T13:50:56,p2_reached,Academic employee,Aalborg,94ed6567-7d3d-429a-9bc5-0e422b6f1cf4
+2026-02-09T13:51:03,analysis_reached,Academic employee,Aalborg,94ed6567-7d3d-429a-9bc5-0e422b6f1cf4
+2026-02-09T13:56:32,start,Academic employee,Aalborg,fa9fb371-9c8b-420b-a7b2-2106f89a4f9d
+2026-02-09T13:56:32,p1_reached,Academic employee,Aalborg,fa9fb371-9c8b-420b-a7b2-2106f89a4f9d
+2026-02-09T13:56:34,p2_reached,Academic employee,Aalborg,fa9fb371-9c8b-420b-a7b2-2106f89a4f9d
+2026-02-09T13:56:37,analysis_reached,Academic employee,Aalborg,fa9fb371-9c8b-420b-a7b2-2106f89a4f9d
+2026-02-09T13:58:50,start,Others,Copenhagen,79dd8236-e4a0-4e6a-9ffa-97f6498ea39a
+2026-02-09T13:58:50,p1_reached,Others,Copenhagen,79dd8236-e4a0-4e6a-9ffa-97f6498ea39a
+2026-02-09T14:00:36,start,Academic employee,Odense,12fc16ac-bb4b-49e2-9121-b4c3a0d7c936
+2026-02-09T14:00:36,p1_reached,Academic employee,Odense,12fc16ac-bb4b-49e2-9121-b4c3a0d7c936
+=======
+timestamp,occupation,location,session_id
+2026-01-07T12:07:36,Industry,Aalborg,016d28f3-4437-488b-bbc8-ce0d31740ae6
+>>>>>>> d90081dd697e27996f67dd1192011d6df69d3b7f
