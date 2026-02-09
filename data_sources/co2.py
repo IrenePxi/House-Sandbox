@@ -7,6 +7,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
+import certifi
+import warnings
 from datetime import datetime, date, time, timedelta
 
 # -------- EnergiDataService endpoints --------
@@ -24,7 +26,13 @@ def fetch_co2_for_day(period_start:date, period_end:date, area) -> pd.Series:
 
 
     url = "https://api.energidataservice.dk/dataset/CO2EmisProg?limit=200000"
-    r = requests.get(url, timeout=40); r.raise_for_status()
+    try:
+        r = requests.get(url, timeout=40, verify=certifi.where())
+        r.raise_for_status()
+    except requests.exceptions.SSLError:
+        warnings.warn(f"SSL verification failed for {url}. Retrying without verification.")
+        r = requests.get(url, timeout=40, verify=False)
+        r.raise_for_status()
     recs = r.json().get("records", [])
     if not recs:
         return pd.Series(index=idx5, dtype=float, name="gCO2_per_kWh")

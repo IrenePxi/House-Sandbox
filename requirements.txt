@@ -13,3 +13,4 @@ python-dateutil>=2.8
 pytz>=2024.1
 pulp>=2.8.0
 highspy>=1.7.0
+certifi>=2024.2.2

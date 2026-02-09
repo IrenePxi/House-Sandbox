@@ -6,6 +6,8 @@ from __future__ import annotations
 import pandas as pd
 import numpy as np
 import requests
+import certifi
+import warnings
 
 def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
                              tz: str = "Europe/Copenhagen") -> pd.DataFrame:
@@ -22,7 +24,13 @@ def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
             f"&end_date={e_date.strftime('%Y-%m-%d')}"
             f"&timezone={tz.replace('/', '%2F')}"
         )
-        r = requests.get(url, timeout=40); r.raise_for_status()
+        try:
+            r = requests.get(url, timeout=40, verify=certifi.where())
+            r.raise_for_status()
+        except requests.exceptions.SSLError:
+            warnings.warn(f"SSL verification failed for {base_url}. Retrying without verification.")
+            r = requests.get(url, timeout=40, verify=False)
+            r.raise_for_status()
         h = r.json().get("hourly", {})
         if not h: return pd.DataFrame()
         df = pd.DataFrame(h).rename(columns={

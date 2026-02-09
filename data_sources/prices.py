@@ -7,6 +7,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
+import certifi
+import warnings
 from datetime import datetime, date, time
 
 # -------- EnergiDataService endpoints --------
@@ -17,8 +19,13 @@ TZ_DK = "Europe/Copenhagen"
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _fetch_dayahead_prices_latest(area: str = "DK1") -> pd.DataFrame:
-    r = requests.get(f"{EDS_PRICE_URL_NEW}?limit=200000", timeout=40)
-    r.raise_for_status()
+    try:
+        r = requests.get(f"{EDS_PRICE_URL_NEW}?limit=200000", timeout=40, verify=certifi.where())
+        r.raise_for_status()
+    except requests.exceptions.SSLError:
+        warnings.warn(f"SSL verification failed for {EDS_PRICE_URL_NEW}. Retrying without verification.")
+        r = requests.get(f"{EDS_PRICE_URL_NEW}?limit=200000", timeout=40, verify=False)
+        r.raise_for_status()
     recs = r.json().get("records", [])
     if not recs:
         return pd.DataFrame()
@@ -60,7 +67,13 @@ def _fetch_dayahead_prices_latest(area: str = "DK1") -> pd.DataFrame:
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _fetch_elspot_prices(area: str = "DK1") -> pd.DataFrame:
-    r = requests.get(f"{EDS_PRICE_URL_OLD}?limit=200000", timeout=40); r.raise_for_status()
+    try:
+        r = requests.get(f"{EDS_PRICE_URL_OLD}?limit=200000", timeout=40, verify=certifi.where())
+        r.raise_for_status()
+    except requests.exceptions.SSLError:
+        warnings.warn(f"SSL verification failed for {EDS_PRICE_URL_OLD}. Retrying without verification.")
+        r = requests.get(f"{EDS_PRICE_URL_OLD}?limit=200000", timeout=40, verify=False)
+        r.raise_for_status()
     df = pd.DataFrame.from_records(r.json().get("records", []))
     if df.empty or "HourDK" not in df or "PriceArea" not in df or "SpotPriceDKK" not in df:
         return pd.DataFrame()
