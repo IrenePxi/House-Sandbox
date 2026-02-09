@@ -46,20 +46,20 @@ def render_header():
         except ValueError:
             current_index = 0
 
-        # Create a targeted container for CSS
-        st.markdown('<div id="nav-container">', unsafe_allow_html=True)
-        page = st.radio(
-            "Navigation", 
+        # Callback to sync state
+        def sync_nav():
+            st.session_state["active_page"] = st.session_state["header_nav_radio"]
+
+        # Create the radio navigation with a unique key and callback
+        st.radio(
+            "HeaderNav", 
             pages,
             index=current_index,
             horizontal=True,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="header_nav_radio",
+            on_change=sync_nav
         )
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        if page != st.session_state["active_page"]:
-            st.session_state["active_page"] = page
-            st.rerun()
 
     with col_prof:
         with st.popover("👤", width="content"):

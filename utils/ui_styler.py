@@ -17,18 +17,15 @@ def load_custom_css():
     }
 
     /* Style radio buttons as text links for navigation (TARGETED) */
-    #nav-container [data-testid="stRadio"] {
-        margin-top: 0.1rem !important;
-    }
-    
-    #nav-container [data-testid="stRadio"] div[role="radiogroup"] {
+    div[role="radiogroup"][aria-label="HeaderNav"] {
         gap: 3rem !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
+        margin-top: 0.2rem !important;
     }
     
-    #nav-container [data-testid="stRadio"] label {
+    div[role="radiogroup"][aria-label="HeaderNav"] label {
         background: transparent !important;
         border: none !important;
         padding: 0.5rem 0 !important;
@@ -38,9 +35,9 @@ def load_custom_css():
         align-items: center !important;
     }
     
-    #nav-container [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label div[data-testid="stMarkdownContainer"] p {
         color: #64748B !important;
-        font-size: 1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 500 !important;
         margin: 0 !important;
         padding-bottom: 2px !important;
@@ -49,27 +46,20 @@ def load_custom_css():
     }
     
     /* Hover state */
-    #nav-container [data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label:hover div[data-testid="stMarkdownContainer"] p {
         color: #2563EB !important;
     }
     
     /* Active state */
-    #nav-container [data-testid="stRadio"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+    div[role="radiogroup"][aria-label="HeaderNav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
         color: #111827 !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #2563EB !important;
     }
     
-    /* Hide the radio input but keep it clickable via label association */
-    #nav-container [data-testid="stRadio"] input[type="radio"] {
-        width: 0 !important;
-        height: 0 !important;
-        position: absolute !important;
-        opacity: 0 !important;
-    }
-    
-    /* Hide the circular icon */
-    #nav-container [data-testid="stRadio"] label > div:first-child {
+    /* Hide the radio input but keep it functional */
+    div[role="radiogroup"][aria-label="HeaderNav"] input[type="radio"],
+    div[role="radiogroup"][aria-label="HeaderNav"] label > div:first-child {
         display: none !important;
     }
 
