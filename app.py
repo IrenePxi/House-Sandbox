@@ -39,10 +39,12 @@ def render_header():
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = "Market & Weather"
         
+        # Sync the radio widget's state with the actual active page
+        st.session_state["page_nav"] = st.session_state["active_page"]
+        
         page = st.radio(
             "nav",
             ["Market & Weather", "Devices & Layout", "Analysis"],
-            index=["Market & Weather", "Devices & Layout", "Analysis"].index(st.session_state.get("active_page", "Market & Weather")),
             horizontal=True,
             label_visibility="collapsed",
             key="page_nav"
