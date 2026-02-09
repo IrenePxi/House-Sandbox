@@ -169,6 +169,35 @@ def ensure_device_cfg(full_key: str, cat_key: str, dev_type: str, cfgs: dict) ->
     return cfgs[full_key]
 
 
+def apply_house_preset(size_str: str):
+    """
+    Apply a house type preset to the session state.
+    Updates device_selection, device_configs, and ALL checkbox widget states.
+    """
+    preset = HOUSE_TYPE_PRESETS.get(size_str)
+    if not preset:
+        return
+
+    # 1. Update selection dictionary
+    new_sel = {fk: True for fk in preset["selected_devices"]}
+    st.session_state["device_selection"] = new_sel
+
+    # 2. Reset and apply config overrides
+    st.session_state["device_configs"] = {}
+    for full_key, overrides in preset.get("config_overrides", {}).items():
+        cat, dev = full_key.split(":")
+        cfg = get_default_config(dev, cat)
+        cfg.update(overrides)
+        st.session_state["device_configs"][full_key] = cfg
+
+    # 3. Synchronize ALL checkbox widget states in st.session_state
+    # This is critical to force the UI to match the preset.
+    for cat_k, cat_info in DEVICE_CATEGORIES.items():
+        for dev_type, _ in cat_info["devices"]:
+            fk = f"{cat_k}:{dev_type}"
+            st.session_state[f"chk_{fk}"] = fk in new_sel
+
+
 def _get_outdoor_profile_local():
     if (
         "temp_daily" in st.session_state
@@ -1301,25 +1330,8 @@ def render_devices_page_house():
     if prev_size != current_size:
         st.session_state["last_house_size"] = current_size
         if prev_size is not None:
-            # Apply Preset on change
-            preset = HOUSE_TYPE_PRESETS.get(current_size)
-            if preset:
-                # 1. Update selection
-                st.session_state["device_selection"] = {k: True for k in preset["selected_devices"]}
-                
-                # 2. Reset and apply config overrides
-                st.session_state["device_configs"] = {}
-                for full_key, overrides in preset.get("config_overrides", {}).items():
-                    cat, dev = full_key.split(":")
-                    cfg = get_default_config(dev, cat)
-                    cfg.update(overrides)
-                    st.session_state["device_configs"][full_key] = cfg
-                
-                # 3. Clear widget states to force UI update
-                for k in list(st.session_state.keys()):
-                    if k.startswith("chk_"):
-                        del st.session_state[k]
-                st.rerun()
+            apply_house_preset(current_size)
+            st.rerun()
 
     elif prev_res != current_res:
         st.session_state["last_house_residents"] = current_res
@@ -1338,39 +1350,16 @@ def render_devices_page_house():
                     elif dev in ["range_hood", "oven", "induction"]:
                         cfg["duration_min"] = new_def["duration_min"]
 
-    if "device_selection" not in st.session_state:
-        preset = HOUSE_TYPE_PRESETS.get(current_size, HOUSE_TYPE_PRESETS["Medium house"])
-        st.session_state["device_selection"] = {k: True for k in preset["selected_devices"]}
-
-    if "device_configs" not in st.session_state:
-        st.session_state["device_configs"] = {}
-        preset = HOUSE_TYPE_PRESETS.get(current_size, HOUSE_TYPE_PRESETS["Medium house"])
-        for full_key, overrides in preset.get("config_overrides", {}).items():
-            cat, dev = full_key.split(":")
-            cfg = get_default_config(dev, cat)
-            cfg.update(overrides)
-            st.session_state["device_configs"][full_key] = cfg
+    if "device_selection" not in st.session_state or "device_configs" not in st.session_state:
+        apply_house_preset(current_size)
 
     sel = st.session_state["device_selection"]
     cfgs = st.session_state["device_configs"]
 
     # --- Reset button ---
     if st.button("🔄 Reset all devices to house defaults", width="stretch"):
-        preset = HOUSE_TYPE_PRESETS.get(current_size)
-        if preset:
-            st.session_state["device_selection"] = {k: True for k in preset["selected_devices"]}
-            st.session_state["device_configs"] = {}
-            for full_key, overrides in preset.get("config_overrides", {}).items():
-                cat, dev = full_key.split(":")
-                cfg = get_default_config(dev, cat)
-                cfg.update(overrides)
-                st.session_state["device_configs"][full_key] = cfg
-            
-            # Clear widget states to force UI update
-            for k in list(st.session_state.keys()):
-                if k.startswith("chk_"):
-                    del st.session_state[k]
-            st.rerun()
+        apply_house_preset(current_size)
+        st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
