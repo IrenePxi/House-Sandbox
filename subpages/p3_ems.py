@@ -573,22 +573,45 @@ def render_analysis_page():
 
                 # internal function to run in thread
                 def _run_optimization_task():
-                    A = solve_stepA_relaxed_global_opt(
-                        idx=idx, load_nonthermal_kw=p_load_nonthermal, pv_avail_kw=pv_tot, price_el=ps, tout_c=tout,
-                        dhw_draw_th_kw=Q_draw_th.reindex(idx).fillna(0.0), leisure_el_kw=p_thermal_leisure_el,
+                    # --- Step A: 15-min Resolution (Speedup) ---
+                    # Resample integer/float inputs to 15T
+                    idx_15 = idx.resample("15min").first() # or mean mainly for timestamp alignment
+                    # Note: .resample("15min").mean() is good for power/temp. 
+                    # For price we can use mean or first? Mean is safer for cost.
+                    
+                    def _re(s: pd.Series):
+                        return s.resample("15min").mean().reindex(idx_15).fillna(0.0)
+                    
+                    p_load_15 = _re(p_load_nonthermal)
+                    pv_tot_15 = _re(pv_tot)
+                    ps_15 = _re(ps)
+                    tout_15 = _re(tout)
+                    Q_draw_15 = _re(Q_draw_th.reindex(idx).fillna(0.0))
+                    p_leisure_15 = _re(p_thermal_leisure_el)
+
+                    A_15 = solve_stepA_relaxed_global_opt(
+                        idx=idx_15, load_nonthermal_kw=p_load_15, pv_avail_kw=pv_tot_15, price_el=ps_15, tout_c=tout_15,
+                        dhw_draw_th_kw=Q_draw_15, leisure_el_kw=p_leisure_15,
                         batt_cfg=batt_cfg if has_battery else None, fc_cfg=fc_cfg if has_fc else None,
                         space_cfg=dict(cfgs.get("thermal:space_heat", {})), dhw_cfg=dict(cfgs.get("thermal:dhw", {})),
-                        dt_h=dt_h, enable_fc=has_fc, enable_batt=has_battery,
+                        dt_h=0.25, # 15 min steps
+                        enable_fc=has_fc, enable_batt=has_battery,
                     )
-                    B = stepB_project_real_thermal(idx=idx, context=context, cfgs=cfgs, simulate_device_fn=simulate_device, simulate_dhw_with_extra_debug_fn=simulate_dhw_with_extra_debug, fc_power_kw=A["p_fc_kw"], fc_cfg=fc_cfg or {})
+                    
+                    # Upsample FC result to 1-min for Step B/C
+                    # ffill makes it a blocky schedule (physically realistic "hold" command)
+                    p_fc_1min = A_15["p_fc_kw"].reindex(idx).ffill().fillna(0.0)
+
+                    # --- Step B & C: 1-min Resolution (Precision) ---
+                    B = stepB_project_real_thermal(idx=idx, context=context, cfgs=cfgs, simulate_device_fn=simulate_device, simulate_dhw_with_extra_debug_fn=simulate_dhw_with_extra_debug, fc_power_kw=p_fc_1min, fc_cfg=fc_cfg or {})
                     load1 = load0.copy().sub(p_thermal_dhw_el, fill_value=0.0).add(B["p_dhw_el_kw"], fill_value=0.0).sub(p_thermal_space_el, fill_value=0.0).add(B["p_space_el_kw"], fill_value=0.0).clip(lower=0.0)
-                    C = solve_stepC_grid_batt_with_fixed_fc(idx=idx, load_kw=load1, pv_avail_kw=pv_tot, p_fc_kw=A["p_fc_kw"], price_el=ps, batt_cfg=batt_cfg if has_battery else None, dt_h=dt_h, objective="cost", enforce_end_soc="eq")
+                    C = solve_stepC_grid_batt_with_fixed_fc(idx=idx, load_kw=load1, pv_avail_kw=pv_tot, p_fc_kw=p_fc_1min, price_el=ps, batt_cfg=batt_cfg if has_battery else None, dt_h=dt_h, objective="cost", enforce_end_soc="eq")
                     
                     dispatch_go = dict(C)
-                    dispatch_go.update({"p_fc_cmd_kw": A["p_fc_kw"], "q_fc_avail_kw": B["q_fc_avail_kw"], "q_dhw_used_kw": B["q_dhw_used_kw"], "q_fc_to_space_kw": B["q_to_space_kw"], "load1_kw": load1})
-                    dispatch_go["P_by_device_kw"] = {"Optimized Load": load1, "PV Used": C["pv_used_kw"], "Battery": C["p_bat_kw"], "Grid Import": C["grid_import_kw"], "FC Generation": A["p_fc_kw"]}
+                    dispatch_go.update({"p_fc_cmd_kw": p_fc_1min, "q_fc_avail_kw": B["q_fc_avail_kw"], "q_dhw_used_kw": B["q_dhw_used_kw"], "q_fc_to_space_kw": B["q_to_space_kw"], "load1_kw": load1})
+                    dispatch_go["P_by_device_kw"] = {"Optimized Load": load1, "PV Used": C["pv_used_kw"], "Battery": C["p_bat_kw"], "Grid Import": C["grid_import_kw"], "FC Generation": p_fc_1min}
                     
-                    kpis_go = compute_kpis_from_dispatch(idx=idx, pv_tot=pv_tot, grid_import_kw=C["grid_import_kw"], pv_unused_kw=C["pv_unused_kw"], dt_h=dt_h, total_cost_baseline=total_cost, total_co2_baseline_kg=total_co2_grid_kg, ps=ps, cs=cs, p_fc_kw=A["p_fc_kw"], fc_cfg=fc_cfg if has_fc else None, cost_fc_dkk=C.get("fc_cost_dkk"))
+                    kpis_go = compute_kpis_from_dispatch(idx=idx, pv_tot=pv_tot, grid_import_kw=C["grid_import_kw"], pv_unused_kw=C["pv_unused_kw"], dt_h=dt_h, total_cost_baseline=total_cost, total_co2_baseline_kg=total_co2_grid_kg, ps=ps, cs=cs, p_fc_kw=p_fc_1min, fc_cfg=fc_cfg if has_fc else None, cost_fc_dkk=C.get("fc_cost_dkk"))
                     
                     return dispatch_go, kpis_go
 
