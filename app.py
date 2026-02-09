@@ -35,27 +35,27 @@ def render_header():
         """, unsafe_allow_html=True)
     
     with col_nav:
+        pages = ["Market & Weather", "Devices & Layout", "Analysis"]
         if "active_page" not in st.session_state:
-            st.session_state["active_page"] = "Market & Weather"
-        if "prev_active_page" not in st.session_state:
-            st.session_state["prev_active_page"] = st.session_state["active_page"]
+            st.session_state["active_page"] = pages[0]
         
-        # Detect if a button changed the page
-        if st.session_state["active_page"] != st.session_state["prev_active_page"]:
-            st.session_state["page_nav"] = st.session_state["active_page"]
-            st.session_state["prev_active_page"] = st.session_state["active_page"]
+        # Determine current index based on session state
+        try:
+            current_index = pages.index(st.session_state["active_page"])
+        except ValueError:
+            current_index = 0
 
         page = st.radio(
             "nav",
-            ["Market & Weather", "Devices & Layout", "Analysis"],
+            pages,
+            index=current_index,
             horizontal=True,
             label_visibility="collapsed",
             key="page_nav"
         )
         
-        if page != st.session_state.get("active_page"):
+        if page != st.session_state["active_page"]:
             st.session_state["active_page"] = page
-            st.session_state["prev_active_page"] = page
             st.rerun()
 
     with col_prof:
