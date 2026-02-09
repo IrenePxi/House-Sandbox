@@ -17,54 +17,59 @@ def load_custom_css():
     }
 
     /* Style radio buttons as text links for navigation */
-    div[role="radiogroup"][aria-label="nav"] {
-        gap: 2.5rem !important;
-        display: flex !important;
-        align-items: center !important;
-        margin-top: 0.2rem !important;
+    [data-testid="stRadio"] {
+        margin-top: 0.1rem !important;
     }
     
-    div[role="radiogroup"][aria-label="nav"] label {
+    [data-testid="stRadio"] div[role="radiogroup"] {
+        gap: 3rem !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+    
+    [data-testid="stRadio"] label {
         background: transparent !important;
         border: none !important;
-        box-shadow: none !important;
         padding: 0.5rem 0 !important;
         cursor: pointer !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
     }
     
-    div[role="radiogroup"][aria-label="nav"] label div[data-testid="stMarkdownContainer"] p {
+    [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
         color: #64748B !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
         margin: 0 !important;
-        padding-bottom: 4px !important;
+        padding-bottom: 2px !important;
         border-bottom: 2px solid transparent !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.1s ease-in-out !important;
     }
     
     /* Hover state */
-    div[role="radiogroup"][aria-label="nav"] label:hover div[data-testid="stMarkdownContainer"] p {
+    [data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {
         color: #2563EB !important;
     }
     
-    /* Active/Selected state - Streamlit uses a specific attribute for the selected label if we can target it, 
-       but often it's easier to just style labels that have a specific data-testid or similar if available.
-       Actually, Streamlit's baseui uses [data-checked="true"] on the radio button container. */
-    div[role="radiogroup"][aria-label="nav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
-        color: #1E293B !important;
+    /* Active state */
+    [data-testid="stRadio"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+        color: #111827 !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #2563EB !important;
     }
     
-    /* Hide radio button circles but keep them functional */
-    div[role="radiogroup"][aria-label="nav"] input[type="radio"] {
-        position: absolute !important;
-        opacity: 0 !important;
+    /* Hide the radio input but keep it clickable via label association */
+    [data-testid="stRadio"] input[type="radio"] {
         width: 0 !important;
         height: 0 !important;
+        position: absolute !important;
+        opacity: 0 !important;
     }
     
-    div[role="radiogroup"][aria-label="nav"] label > div:first-child {
+    /* Hide the circular icon */
+    [data-testid="stRadio"] label > div:first-child {
         display: none !important;
     }
 

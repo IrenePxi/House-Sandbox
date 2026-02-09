@@ -20,6 +20,7 @@ if "day" not in st.session_state:
 # No more top-level rendering here, we'll do it at the bottom
 
 # --- Navigation Logic ---
+# --- Navigation Logic ---
 def render_header():
     """Renders the top navigation bar with text-based links."""
     
@@ -39,25 +40,25 @@ def render_header():
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = pages[0]
         
-        # Determine current index
+        # Determine current index based on session state
         try:
-            curr_idx = pages.index(st.session_state["active_page"])
-        except:
-            curr_idx = 0
+            current_index = pages.index(st.session_state["active_page"])
+        except ValueError:
+            current_index = 0
 
-        # Callback for top navigation
-        def on_nav_change():
-            st.session_state["active_page"] = st.session_state["nav_radio"]
-
-        st.radio(
-            "nav",
+        # Create the radio navigation
+        # Note: We do NOT use a 'key' here to ensure the 'index' always controls the widget
+        page = st.radio(
+            "Navigation", 
             pages,
-            index=curr_idx,
+            index=current_index,
             horizontal=True,
-            label_visibility="collapsed",
-            key="nav_radio",
-            on_change=on_nav_change
+            label_visibility="collapsed"
         )
+        
+        if page != st.session_state["active_page"]:
+            st.session_state["active_page"] = page
+            st.rerun()
 
     with col_prof:
         with st.popover("👤", width="content"):
@@ -80,7 +81,7 @@ def render_header():
                     "user_profile_confirmed", "user_profile", "admin_active",
                     "price_daily", "co2_daily", "temp_daily", "weather_hr",
                     "note_price", "note_co2", "note_temp", "device_configs",
-                    "device_selection", "active_page", "page_nav"
+                    "device_selection", "active_page"
                 ]
                 for key in keys_to_clear:
                     if key in st.session_state:
@@ -103,17 +104,17 @@ if "house_info" not in st.session_state:
         "residents": 2,
     }
 
-# Check user profile before showing anything else
+# Check user profile BEFORE showing anything else
 render_front_page()
 
 # Header / Navigation
 render_header()
 
 # Page Routing
-page = st.session_state.get("active_page", "Market & Weather")
-if "Market" in page:
+active = st.session_state.get("active_page", "Market & Weather")
+if "Market" in active:
     render_scenario_page()
-elif "Devices" in page:
+elif "Devices" in active:
     render_devices_page_house()
-elif "Analysis" in page:
+elif "Analysis" in active:
     render_analysis_page()
