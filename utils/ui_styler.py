@@ -18,69 +18,52 @@ def load_custom_css():
 
 
     /* Style radio buttons as text links for navigation (TARGETED by Column) */
-    /* We target the radio button that is inside the header's navigation column. 
-       Since we can't easily target the column by ID without more HTML hacking,
-       we will use a slightly broader selector that we know fits the header profile 
-       (horizontal, gap around 3rem) AND verify it works. */
+    /* We target the radio button that is inside the header's navigation column. */
     
-    div[data-testid="stRadio"] > label[data-testid="stWidgetLabel"] {
-        display: none;
+    /* 1. HIDE THE RADIO INPUT AND CIRCLE COMPLETELY */
+    /* This targets the outer div of the radio option and hides the first child (the circle) */
+    div[row-widget="radio"] div[role="radiogroup"] > label > div:first-child {
+        display: none !important;
     }
-
-    div[role="radiogroup"][aria-label="HeaderNav"], 
-    div[row-widget="radio"] { 
-        /* Fallback: if aria-label is missing, we try to target via structure if possible, 
-           but for now let's hope aria-label works OR we target via the specific unique key class if Streamlit generates one.
-           Actually, the most robust way without ID is to target the specific 'horizontal' radio at the top. */
-        margin-top: 0.2rem !important;
-    }
-
-    /* FORCE TEXT LINK STYLE on the HeaderNav */
-    /* We use the attribute selector again, but if it fails, the user sees standard buttons. 
-       Let's try to be deeper. */
-    div[role="radiogroup"][aria-label="HeaderNav"] {
-        gap: 3rem !important;
+    
+    /* 2. LAYOUT THE TEXT LINKS HORIZONTALLY */
+    div[row-widget="radio"] div[role="radiogroup"] {
+        gap: 2rem !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
+        margin-top: 0.5rem !important;
     }
-    
-    div[role="radiogroup"][aria-label="HeaderNav"] label {
+
+    /* 3. STYLE THE TEXT (Normal State) */
+    div[row-widget="radio"] div[role="radiogroup"] label {
         background: transparent !important;
         border: none !important;
-        padding: 0.5rem 0 !important;
+        padding: 0.2rem 0 !important;
         cursor: pointer !important;
         margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
     }
     
-    div[role="radiogroup"][aria-label="HeaderNav"] label div[data-testid="stMarkdownContainer"] p {
-        color: #64748B !important;
-        font-size: 1.05rem !important;
+    div[row-widget="radio"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
+        color: #475569 !important; /* Slate-600 */
+        font-size: 1rem !important;
         font-weight: 500 !important;
         margin: 0 !important;
-        padding-bottom: 2px !important;
-        border-bottom: 2px solid transparent !important;
-        transition: all 0.1s ease-in-out !important;
+        border-bottom: 2px solid transparent !important; /* Reserve space for underline */
+        transition: all 0.2s ease !important;
     }
-    
-    /* Hover state */
-    div[role="radiogroup"][aria-label="HeaderNav"] label:hover div[data-testid="stMarkdownContainer"] p {
-        color: #2563EB !important;
-    }
-    
-    /* Active state */
-    div[role="radiogroup"][aria-label="HeaderNav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
-        color: #111827 !important;
-        font-weight: 700 !important;
+
+    /* 4. HOVER STATE (Underline) */
+    div[row-widget="radio"] div[role="radiogroup"] label:hover div[data-testid="stMarkdownContainer"] p {
+        color: #2563EB !important; /* Blue-600 */
         border-bottom: 2px solid #2563EB !important;
     }
-    
-    /* Hide the radio input but keep it functional */
-    div[role="radiogroup"][aria-label="HeaderNav"] input[type="radio"],
-    div[role="radiogroup"][aria-label="HeaderNav"] label > div:first-child {
-        display: none !important;
+
+    /* 5. ACTIVE STATE (Bold + Underline) */
+    div[row-widget="radio"] div[role="radiogroup"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+        color: #0F172A !important; /* Slate-900 */
+        font-weight: 700 !important;
+        border-bottom: 2px solid #2563EB !important;
     }
 
 
