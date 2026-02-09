@@ -507,7 +507,7 @@ def render_analysis_page():
                     fig_ts.add_scatter(x=idx, y=-pv_tot.values, mode="lines", name="Solar Generation", fill="tozeroy", line=dict(color="#10B981", width=1))
                 fig_ts.add_scatter(x=idx, y=grid_import.values, mode="lines", name="Grid Import", line=dict(color="#2563EB", dash="dot"))
                 fig_ts.update_layout(height=350, margin=dict(l=10, r=10, t=10, b=10), xaxis_title="", yaxis_title="kW", template="plotly_white", legend=dict(orientation="h", y=-0.2))
-                st.plotly_chart(fig_ts, use_container_width=True)
+                st.plotly_chart(fig_ts, width="stretch")
 
         with row1_col2:
             with st.container(border=True):
@@ -526,7 +526,7 @@ def render_analysis_page():
                 if values:
                     fig_pie = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.4, marker=dict(colors=["#1E293B", "#2563EB", "#10B981", "#F59E0B"]))])
                     fig_pie.update_layout(height=350, margin=dict(l=10, r=10, t=10, b=10), legend=dict(orientation="h", y=-0.1))
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    st.plotly_chart(fig_pie, width="stretch")
                 else:
                     st.caption("No non-zero loads to show.")
 
@@ -558,7 +558,7 @@ def render_analysis_page():
         st.markdown("### System Optimization")
         st.info("Run a combined heat and power optimization to minimize costs and carbon intensity via smart dispatch of battery and FC (if enabled).")
         
-        if st.button("🚀 Run Global Optimization (60s Limit)", type="primary", use_container_width=True, key="go_run_btn"):
+        if st.button("🚀 Run Global Optimization (60s Limit)", type="primary", width="stretch", key="go_run_btn"):
             # Initialize progress bar
             pbar = st.progress(0, text="Initializing optimization engine...")
             start_time = time.time()
@@ -575,7 +575,8 @@ def render_analysis_page():
                 def _run_optimization_task():
                     # --- Step A: 15-min Resolution (Speedup) ---
                     # Resample integer/float inputs to 15T
-                    idx_15 = idx.resample("15min").first() # or mean mainly for timestamp alignment
+                    # Fix: DatetimeIndex has no resample, wrap in Series
+                    idx_15 = pd.Series(0, index=idx).resample("15min").first().index
                     # Note: .resample("15min").mean() is good for power/temp. 
                     # For price we can use mean or first? Mean is safer for cost.
                     
@@ -654,7 +655,7 @@ def render_analysis_page():
                 for name, s in d.get("P_by_device_kw", {}).items():
                     if isinstance(s, pd.Series): fig_dev.add_scatter(x=idx, y=s.reindex(idx).fillna(0.0).values, mode="lines", name=name)
                 fig_dev.update_layout(height=400, margin=dict(l=10, r=10, t=10, b=10), xaxis_title="", yaxis_title="kW", template="plotly_white", legend=dict(orientation="h", y=-0.2))
-                st.plotly_chart(fig_dev, use_container_width=True)
+                st.plotly_chart(fig_dev, width="stretch")
 
             if has_battery and "soc_kwh" in d:
                 with st.container(border=True):
@@ -663,7 +664,7 @@ def render_analysis_page():
                     soc_kwh = d["soc_kwh"]
                     if isinstance(soc_kwh, pd.Series) and cap_kwh > 0:
                         fig_soc = ems_soc_plot(idx, soc_kwh, cap_kwh)
-                        st.plotly_chart(fig_soc, use_container_width=True)
+                        st.plotly_chart(fig_soc, width="stretch")
         else:
             st.info("Click **Run Global Optimization** to compute results.")
 
