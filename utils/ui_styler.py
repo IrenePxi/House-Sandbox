@@ -18,43 +18,50 @@ def load_custom_css():
 
     /* Style radio buttons as text links for navigation */
     div[role="radiogroup"][aria-label="nav"] {
-        gap: 2rem !important;
+        gap: 2.5rem !important;
         display: flex !important;
         align-items: center !important;
-        margin-top: 0.16rem !important;
+        margin-top: 0.2rem !important;
     }
     
     div[role="radiogroup"][aria-label="nav"] label {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 0 !important;
+        padding: 0.5rem 0 !important;
+        cursor: pointer !important;
     }
     
     div[role="radiogroup"][aria-label="nav"] label div[data-testid="stMarkdownContainer"] p {
         color: #64748B !important;
         font-size: 1rem !important;
-        font-weight: 400 !important;
+        font-weight: 500 !important;
         margin: 0 !important;
-        cursor: pointer !important;
-        padding-bottom: 0.25rem !important;
+        padding-bottom: 4px !important;
         border-bottom: 2px solid transparent !important;
         transition: all 0.2s ease !important;
     }
     
+    /* Hover state */
     div[role="radiogroup"][aria-label="nav"] label:hover div[data-testid="stMarkdownContainer"] p {
+        color: #2563EB !important;
+    }
+    
+    /* Active/Selected state - Streamlit uses a specific attribute for the selected label if we can target it, 
+       but often it's easier to just style labels that have a specific data-testid or similar if available.
+       Actually, Streamlit's baseui uses [data-checked="true"] on the radio button container. */
+    div[role="radiogroup"][aria-label="nav"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
         color: #1E293B !important;
+        font-weight: 700 !important;
         border-bottom: 2px solid #2563EB !important;
     }
     
-    div[role="radiogroup"][aria-label="nav"] label[data-baseweb="radio"] div[data-testid="stMarkdownContainer"] p {
-        font-weight: 600 !important;
-        color: #1E293B !important;
-    }
-    
-    /* Hide radio button circles */
+    /* Hide radio button circles but keep them functional */
     div[role="radiogroup"][aria-label="nav"] input[type="radio"] {
-        display: none !important;
+        position: absolute !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     
     div[role="radiogroup"][aria-label="nav"] label > div:first-child {

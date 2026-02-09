@@ -16,8 +16,8 @@ load_custom_css()
 if "day" not in st.session_state:
     st.session_state["day"] = date.today()
 
-# Check user profile before showing anything else
-render_front_page()
+# --- App Execution ---
+# No more top-level rendering here, we'll do it at the bottom
 
 # --- Navigation Logic ---
 def render_header():
@@ -39,24 +39,25 @@ def render_header():
         if "active_page" not in st.session_state:
             st.session_state["active_page"] = pages[0]
         
-        # Determine current index based on session state
+        # Determine current index
         try:
-            current_index = pages.index(st.session_state["active_page"])
-        except ValueError:
-            current_index = 0
+            curr_idx = pages.index(st.session_state["active_page"])
+        except:
+            curr_idx = 0
 
-        page = st.radio(
+        # Callback for top navigation
+        def on_nav_change():
+            st.session_state["active_page"] = st.session_state["nav_radio"]
+
+        st.radio(
             "nav",
             pages,
-            index=current_index,
+            index=curr_idx,
             horizontal=True,
             label_visibility="collapsed",
-            key="page_nav"
+            key="nav_radio",
+            on_change=on_nav_change
         )
-        
-        if page != st.session_state["active_page"]:
-            st.session_state["active_page"] = page
-            st.rerun()
 
     with col_prof:
         with st.popover("👤", width="content"):
