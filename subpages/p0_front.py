@@ -8,6 +8,8 @@ import uuid
 # --- Constants ---
 ADMIN_PASSWORD = "FCCOGEN"
 LOG_PATH = Path("usage_log.csv")
+ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "local_debug")
+
 
 from utils.ui_styler import load_custom_css
 
