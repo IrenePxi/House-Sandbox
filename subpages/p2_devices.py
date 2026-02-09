@@ -1319,6 +1319,7 @@ def render_devices_page_house():
                 for k in list(st.session_state.keys()):
                     if k.startswith("chk_"):
                         del st.session_state[k]
+                st.rerun()
 
         st.session_state["last_house_size"] = current_size
 
