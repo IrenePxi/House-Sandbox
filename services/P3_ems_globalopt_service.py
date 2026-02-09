@@ -54,6 +54,26 @@ def _pulp_add_pwl(prob: pulp.LpProblem, x_var: pulp.LpVariable, y_var: pulp.LpVa
             prob += weights[i] <= z[i-1] + z[i], f"w_bound_{name}_{i}"
 
 
+
+def _get_configured_pulp_solver():
+    """
+    Returns a configured PuLP solver optimized for Cloud execution.
+    Prioritizes HiGHS (if available) with 60s time limit and 1% gap.
+    Falls back to CBC with same limits.
+    """
+    available = pulp.listSolvers(onlyAvailable=True)
+    
+    # 1. HiGHS (Preferred)
+    if 'HiGHS' in available:
+        # PuLP 2.8+ supports these standard args for HiGHS
+        # If older pulp, it might ignore them, but usually safe.
+        return pulp.getSolver('HiGHS', timeLimit=60.0, gapRel=0.01, msg=False)
+    
+    # 2. CBC (Fallback)
+    # PuliP_CBC_CMD supports timeLimit (sec) and gapRel (ratio)
+    return pulp.PULP_CBC_CMD(timeLimit=60, gapRel=0.01, msg=False)
+
+
 def _as_series(x, idx, name=None, fill=0.0):
     if x is None:
         return pd.Series(fill, index=idx, name=name)
@@ -545,8 +565,9 @@ def solve_stepA_relaxed_global_opt(
         if enable_fc:
             obj += pulp.lpSum(c_fc_rate[t] * dt_h for t in range(n))
         m.setObjective(obj)
-        # Try HiGHS first, then default
-        solver = pulp.getSolver('HiGHS', msg=0) if 'HiGHS' in pulp.listSolvers() else pulp.PULP_CBC_CMD(msg=0)
+        
+        # Use optimized solver config
+        solver = _get_configured_pulp_solver()
         m.solve(solver)
 
     # --------------------------
@@ -902,7 +923,9 @@ def solve_stepC_grid_batt_with_fixed_fc(
         obj = pulp.lpSum(p_grid[t] * float(price[t]) * dt_h for t in range(n))
         obj += dump_penalty_dkk_per_kwh * pulp.lpSum(p_dump[t] * dt_h for t in range(n))
         m.setObjective(obj)
-        solver = pulp.getSolver('HiGHS', msg=0) if 'HiGHS' in pulp.listSolvers() else pulp.PULP_CBC_CMD(msg=0)
+        
+        # Use optimized solver config
+        solver = _get_configured_pulp_solver()
         m.solve(solver)
         if m.status != pulp.LpStatusOptimal:
             raise RuntimeError(f"Step C solve failed. PuLP status: {pulp.LpStatus[m.status]}")
