@@ -212,7 +212,7 @@ def preview_power_profile(cfg: dict, index, p_kw_values, label: str):
         yaxis_title="kW",
         showlegend=False,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def preview_series(index, values, label: str, y_title: str):
@@ -228,7 +228,7 @@ def preview_series(index, values, label: str, y_title: str):
         yaxis_title=y_title,
         showlegend=False,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 # -------------------------------------------------------------------
@@ -656,7 +656,7 @@ def render_editor_thermal(settings_id, cfg, full_key, open_key, dev_type, cfgs):
             plotted = True
         fig.update_layout(height=220, margin=dict(l=10, r=10, t=8, b=8), xaxis_title="Time", yaxis_title="kW")
         if plotted:
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         else:
             st.caption("No per-device split available.")
 
@@ -839,7 +839,7 @@ def render_editor_thermal(settings_id, cfg, full_key, open_key, dev_type, cfgs):
             )
             P_ht, _T_ht = ht.series_kw(idx_hp, tout)
             P_total += P_ht
-            st.plotly_chart(go.Figure().add_scatter(x=P_ht.index, y=P_ht.values, mode="lines").update_layout(height=160, margin=dict(l=10, r=10, t=8, b=8), showlegend=False), use_container_width=True)
+            st.plotly_chart(go.Figure().add_scatter(x=P_ht.index, y=P_ht.values, mode="lines").update_layout(height=160, margin=dict(l=10, r=10, t=8, b=8), showlegend=False), width="stretch")
 
         if cfg["pool_enabled"]:
             st.markdown("### 🏊 Pool heater settings")
@@ -908,7 +908,7 @@ def render_editor_thermal(settings_id, cfg, full_key, open_key, dev_type, cfgs):
             Q_pool, _T_pool = pool.series_kw(idx_hp, tout)
             P_pool = Q_pool / 3.5
             P_total += P_pool
-            st.plotly_chart(go.Figure().add_scatter(x=P_pool.index, y=P_pool.values, mode="lines").update_layout(height=160, margin=dict(l=10, r=10, t=8, b=8), showlegend=False), use_container_width=True)
+            st.plotly_chart(go.Figure().add_scatter(x=P_pool.index, y=P_pool.values, mode="lines").update_layout(height=160, margin=dict(l=10, r=10, t=8, b=8), showlegend=False), width="stretch")
 
         if cfg["hot_tub_enabled"] or cfg["pool_enabled"]:
             st.markdown("**Total leisure electrical power**")
@@ -1356,7 +1356,7 @@ def render_devices_page_house():
     cfgs = st.session_state["device_configs"]
 
     # --- Reset button ---
-    if st.button("🔄 Reset all devices to house defaults", use_container_width=True):
+    if st.button("🔄 Reset all devices to house defaults", width="stretch"):
         preset = HOUSE_TYPE_PRESETS.get(current_size)
         if preset:
             st.session_state["device_selection"] = {k: True for k in preset["selected_devices"]}
@@ -1397,7 +1397,7 @@ def render_devices_page_house():
         with st.container(border=True):
             st.markdown("#### House Layout Visualization")
             layout_fig = build_house_layout_figure(sel, cfgs)
-            st.plotly_chart(layout_fig, use_container_width=True, config={"responsive": True})
+            st.plotly_chart(layout_fig, width="stretch", config={"responsive": True})
 
     with top_right:
         with st.container(border=True):
@@ -1436,7 +1436,7 @@ def render_devices_page_house():
                 plot_bgcolor='rgba(0,0,0,0)',
                 template="plotly_white"
             )
-            st.plotly_chart(figp, use_container_width=True)
+            st.plotly_chart(figp, width="stretch")
 
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
     
@@ -1507,7 +1507,7 @@ def render_category_block(cat_key: str, sel: dict, cfgs: dict):
             render_editor_simple(settings_id, cfg, full_key, open_key)
         
         # Close button
-        if st.button("Close", type="primary", use_container_width=True):
+        if st.button("Close", type="primary", width="stretch"):
             st.session_state[f"dialog_{full_key}"] = False
             st.rerun()
 
@@ -1569,7 +1569,7 @@ def _render_flex_globals(cfgs, sel):
         flex_prefs["w_cost"] = st.slider("Preference (0=CO₂, 1=Cost)", 0.0, 1.0, 0.05, float(flex_prefs.get("w_cost", 1)), key="flex_w_cost")
 
         c1, c2 = st.columns(2)
-        if c1.button("💡 Suggest schedules for all", key="flex_suggest_all", type="primary", use_container_width=True):
+        if c1.button("💡 Suggest schedules for all", key="flex_suggest_all", type="primary", width="stretch"):
             any_up = False
             for fk, cfg in cfgs.items():
                 if fk.startswith("elec_flex:") and cfg:
@@ -1586,7 +1586,7 @@ def _render_flex_globals(cfgs, sel):
             else:
                 st.info("No updates possible.")
 
-        if c2.button("↩ Reset defaults", key="flex_reset_all", use_container_width=True):
+        if c2.button("↩ Reset defaults", key="flex_reset_all", width="stretch"):
             st.session_state["flex_prefs"] = {
                 "w_cost": 1,
                 "window_mode": "Daytime (08–17)",
@@ -1611,6 +1611,6 @@ def _render_flex_globals(cfgs, sel):
                 time_str = ", ".join([f"{i.get('start').strftime('%H:%M')}–{i.get('end').strftime('%H:%M')}" for i in intervals if i.get("start") and i.get("end")])
                 rows.append({"Device": lbl, "#": cfg.get("num_devices", 1), "Dur": cfg.get("duration_min"), "Time": time_str})
         if rows:
-            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
         else:
             st.caption("No flexible devices selected.")

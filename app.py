@@ -55,7 +55,7 @@ def render_header():
             st.rerun()
 
     with col_prof:
-        with st.popover("👤", use_container_width=False):
+        with st.popover("👤", width="content"):
             profile = st.session_state.get("user_profile", {})
             st.markdown(f"""
                 <div style='border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;'>
@@ -65,11 +65,11 @@ def render_header():
                 </div>
             """, unsafe_allow_html=True)
             
-            if st.button("📝 Edit Profile", use_container_width=True, key="edit_profile"):
+            if st.button("📝 Edit Profile", width="stretch", key="edit_profile"):
                 st.session_state["user_profile_confirmed"] = False
                 st.rerun()
             
-            if st.button("🚪 Logout", use_container_width=True, type="primary", key="logout"):
+            if st.button("🚪 Logout", width="stretch", type="primary", key="logout"):
                 # Clear all session state for fresh start
                 keys_to_clear = [
                     "user_profile_confirmed", "user_profile", "admin_active",

@@ -76,7 +76,7 @@ def render_scenario_page():
             st.session_state["price_area"] = preset["area"]
             
             st.markdown("<br><br>", unsafe_allow_html=True)
-            fetch_btn = st.button("Fetch Data", use_container_width=True, type="primary")
+            fetch_btn = st.button("Fetch Data", width="stretch", type="primary")
 
         with col_loc_map:
             df_map = pd.DataFrame({"lat": [st.session_state["geo_lat"]], "lon": [st.session_state["geo_lon"]]})
@@ -118,19 +118,19 @@ def render_scenario_page():
         with st.container(border=True):
             st.markdown("#### Electricity Market Prices")
             fig_price = plot_period_bar(price_series, selected_day=selected_day, title="", ytitle="DKK/kWh")
-            st.plotly_chart(fig_price, use_container_width=True)
+            st.plotly_chart(fig_price, width="stretch")
             if st.session_state.get("note_price"): st.caption(st.session_state["note_price"])
 
         with st.container(border=True):
             st.markdown("#### Carbon Intensity")
             fig_co2 = plot_period_bar(co2_series, selected_day=selected_day, title="", ytitle="gCO₂/kWh")
-            st.plotly_chart(fig_co2, use_container_width=True)
+            st.plotly_chart(fig_co2, width="stretch")
             if st.session_state.get("note_co2"): st.caption(st.session_state["note_co2"])
 
         with st.container(border=True):
             st.markdown("#### Ambient Temperature")
             fig_temp = plot_period_minute(temp_series, selected_day=selected_day, title="", ytitle="°C")
-            st.plotly_chart(fig_temp, use_container_width=True)
+            st.plotly_chart(fig_temp, width="stretch")
             if st.session_state.get("note_temp"): st.caption(st.session_state["note_temp"])
 
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)

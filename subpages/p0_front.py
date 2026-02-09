@@ -57,7 +57,7 @@ def render_admin_stats():
         """, unsafe_allow_html=True)
     with col_h2:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("⬅ Return to User Mode", type="primary", use_container_width=True):
+        if st.button("⬅ Return to User Mode", type="primary", width="stretch"):
             st.session_state["admin_active"] = False
             st.rerun()
 
@@ -118,7 +118,7 @@ def render_admin_stats():
                     legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
                     template="plotly_white"
                 )
-                st.plotly_chart(fig_fn, use_container_width=True)
+                st.plotly_chart(fig_fn, width="stretch")
             else:
                 st.info("Tracking data not yet available.")
 
@@ -141,7 +141,7 @@ def render_admin_stats():
                 xaxis_title="Occupation", yaxis_title="Number of Users",
                 template="plotly_white"
             )
-            st.plotly_chart(fig_occ, use_container_width=True)
+            st.plotly_chart(fig_occ, width="stretch")
 
     # 3. Time and Location Row
     col_time, col_loc = st.columns(2)
@@ -167,7 +167,7 @@ def render_admin_stats():
                 xaxis_title="Date", yaxis_title="Number of Clicks",
                 template="plotly_white"
             )
-            st.plotly_chart(fig_time, use_container_width=True)
+            st.plotly_chart(fig_time, width="stretch")
 
     with col_loc:
         with st.container(border=True):
@@ -187,7 +187,7 @@ def render_admin_stats():
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
                 template="plotly_white"
             )
-            st.plotly_chart(fig_loc, use_container_width=True)
+            st.plotly_chart(fig_loc, width="stretch")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -202,13 +202,13 @@ def render_admin_stats():
                 df.to_csv(index=False).encode("utf-8"),
                 file_name="usage_log.csv",
                 mime="text/csv",
-                use_container_width=True
+                width="stretch"
             )
         
         # Display polished dataframe
         st.dataframe(
             df[["timestamp", "occupation", "location", "session_id"]],
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 
@@ -276,7 +276,7 @@ def ensure_user_profile():
             st.markdown("<br>", unsafe_allow_html=True)
             
             ready = bool(occupation) and bool(location)
-            clicked = st.button("▶ Start using the app", disabled=not ready, type="primary", use_container_width=True)
+            clicked = st.button("▶ Start using the app", disabled=not ready, type="primary", width="stretch")
 
             if clicked and ready:
                 profile = {"occupation": occupation, "location": location}
