@@ -397,7 +397,8 @@ def render_analysis_page():
         p_thermal_el,
         p_thermal_dhw_el,
         p_thermal_space_el,
-        p_thermal_leisure_el
+        p_thermal_leisure_el,
+        device_traces
     ) = build_series_for_analysis(sel, cfgs, context)
     load0 = load_tot
 
@@ -496,8 +497,37 @@ def render_analysis_page():
         m6.metric("CO₂ Footprint", f"{total_co2_grid_kg:.1f} kg" if total_co2_grid_kg is not None else "n/a")
 
         st.markdown("<br>", unsafe_allow_html=True)
+
+        # --- Download Button ---
+        # Prepare DataFrame for download
+        df_download = pd.DataFrame(index=idx)
+        df_download.index.name = "Timestamp"
+        df_download["Total Load (kW)"] = load_tot
+        df_download["PV Generation (kW)"] = pv_tot
+        df_download["Grid Import (kW)"] = grid_import
         
-        row1_col1, row1_col2 = st.columns([2, 1])
+        # Add individual devices
+        for full_key, series in (device_traces or {}).items():
+            if series is None or getattr(series, "empty", False):
+                continue
+            cat, dev = full_key.split(":", 1)
+            cfg = cfgs.get(full_key, {})
+            label = resolve_display_label(full_key, dev, cfg)
+            # Ensure series matches index
+            s = series.reindex(idx).fillna(0.0)
+            df_download[f"{label} (kW)"] = s
+
+        csv = df_download.to_csv().encode('utf-8')
+        
+        st.download_button(
+            label="📥 Download Load Profile Data",
+            data=csv,
+            file_name="load_profile_analysis.csv",
+            mime="text/csv",
+            key="download_csv_p3"
+        )
+        st.markdown("<br>", unsafe_allow_html=True)
+
         with row1_col1:
             with st.container(border=True):
                 st.markdown("#### Power Profile Breakdown")

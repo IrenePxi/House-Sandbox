@@ -77,7 +77,8 @@ def build_series_for_analysis(
     pd.Series,  # p_thermal_el_kw
     pd.Series,  # p_thermal_dhw_el_kw
     pd.Series,  # p_thermal_space_el_kw
-    pd.Series,  # p_thermal_leisure_el_kw   <-- NEW
+    pd.Series,  # p_thermal_leisure_el_kw
+    Dict[str, pd.Series] # device_traces
 ]:
     idx, device_traces, _total = compute_daily_profiles(sel, cfgs, context)
 
@@ -163,5 +164,6 @@ def build_series_for_analysis(
         p_thermal_el,
         p_thermal_dhw_el,
         p_thermal_space_el,
-        p_thermal_leisure_el
+        p_thermal_leisure_el,
+        device_traces  # <--- NEW
     )
