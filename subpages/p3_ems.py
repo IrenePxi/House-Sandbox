@@ -528,6 +528,9 @@ def render_analysis_page():
         )
         st.markdown("<br>", unsafe_allow_html=True)
 
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        row1_col1, row1_col2 = st.columns([2, 1])
         with row1_col1:
             with st.container(border=True):
                 st.markdown("#### Power Profile Breakdown")
