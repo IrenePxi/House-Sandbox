@@ -515,9 +515,15 @@ def render_analysis_page():
             label = resolve_display_label(full_key, dev, cfg)
             # Ensure series matches index
             s = series.reindex(idx).fillna(0.0)
-            df_download[f"{label} (kW)"] = s
+            
+            # Sanitize label (remove emojis/special chars for cleaner CSV)
+            # This regex keeps alphanumeric, spaces, underscores, hyphens, and common brackets
+            # It effectively strips the leading emojis often used in these labels
+            import re
+            clean_label = re.sub(r'[^\w\s\-\(\)\.,]', '', label).strip()
+            df_download[f"{clean_label} (kW)"] = s
 
-        csv = df_download.to_csv().encode('utf-8')
+        csv = df_download.to_csv().encode('utf-8-sig')
         
         st.download_button(
             label="📥 Download Load Profile Data",
