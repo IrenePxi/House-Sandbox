@@ -47,9 +47,9 @@ def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
     s_dt  = pd.Timestamp(start_date, tz=tz)
     e_dt  = pd.Timestamp(end_date,   tz=tz)
 
-    # Archive: anything strictly before today
-    past_end = min(e_dt, today - pd.Timedelta(hours=1))
-    if s_dt < today and past_end >= s_dt:
+    # Archive: up to and including today (archive API serves same-day completed hours)
+    past_end = min(e_dt, today)
+    if s_dt <= past_end:
         try:
             past = _get("https://archive-api.open-meteo.com/v1/archive", s_dt, past_end)
         except Exception as exc:
@@ -58,8 +58,8 @@ def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
     else:
         past = pd.DataFrame()
 
-    # Forecast: today onwards, capped at +16 days (Open-Meteo limit)
-    futr_start = max(s_dt, today)
+    # Forecast: tomorrow onwards (avoids overlap with archive), capped at +16 days
+    futr_start = max(s_dt, today + pd.Timedelta(days=1))
     futr_end   = min(e_dt, today + pd.Timedelta(days=16))
     if futr_start <= futr_end:
         try:
