@@ -47,8 +47,28 @@ def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
     s_dt  = pd.Timestamp(start_date, tz=tz)
     e_dt  = pd.Timestamp(end_date,   tz=tz)
 
-    past = _get("https://archive-api.open-meteo.com/v1/archive", s_dt, min(e_dt, today - pd.Timedelta(hours=1))) if s_dt < today else pd.DataFrame()
-    futr = _get("https://api.open-meteo.com/v1/forecast", max(s_dt, today), e_dt) if e_dt >= today else pd.DataFrame()
+    # Archive: anything strictly before today
+    past_end = min(e_dt, today - pd.Timedelta(hours=1))
+    if s_dt < today and past_end >= s_dt:
+        try:
+            past = _get("https://archive-api.open-meteo.com/v1/archive", s_dt, past_end)
+        except Exception as exc:
+            warnings.warn(f"Archive weather fetch failed: {exc}")
+            past = pd.DataFrame()
+    else:
+        past = pd.DataFrame()
+
+    # Forecast: today onwards, capped at +16 days (Open-Meteo limit)
+    futr_start = max(s_dt, today)
+    futr_end   = min(e_dt, today + pd.Timedelta(days=16))
+    if futr_start <= futr_end:
+        try:
+            futr = _get("https://api.open-meteo.com/v1/forecast", futr_start, futr_end)
+        except Exception as exc:
+            warnings.warn(f"Forecast weather fetch failed: {exc}")
+            futr = pd.DataFrame()
+    else:
+        futr = pd.DataFrame()
 
     parts = [p for p in (past, futr) if not p.empty]
     if not parts:
