@@ -22,8 +22,8 @@ def render_scenario_page():
     
     # Page Header
     st.markdown("""
-        <h1 style='margin-bottom: 0.5rem;'>Market & Weather</h1>
-        <p style='color: #64748B; font-size: 1rem; margin-bottom: 2rem; line-height: 1.6;'>
+        <h1 style='margin-bottom: 0rem;'>Market & Weather</h1>
+        <p style='color: #64748B; font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.4;'>
             <strong>Start here!</strong> First, choose the date range and the location you want to analyze. 
             When you click "Fetch Data", we'll automatically download electricity prices, CO₂ emission data, 
             and weather information. This data forms the environment for your device simulations.
@@ -33,54 +33,49 @@ def render_scenario_page():
     today = date.today()
     min_date = date(2025, 10, 1)
 
-    # 1) Choose period and selected date (Card Layout)
+    preset_locations = {
+        "Aalborg (DK1)":    {"lat": 57.0488, "lon": 9.9217,  "area": "DK1"},
+        "Aarhus (DK1)":     {"lat": 56.1629, "lon": 10.2039, "area": "DK1"},
+        "Odense (DK1)":     {"lat": 55.4038, "lon": 10.4024, "area": "DK1"},
+        "Copenhagen (DK2)": {"lat": 55.6761, "lon": 12.5683, "area": "DK2"},
+    }
+
+    if "city_choice" not in st.session_state and "user_profile" in st.session_state:
+        prof_loc = st.session_state["user_profile"].get("location")
+        if prof_loc:
+            # Find the first preset that contains the user's city name
+            match = next((k for k in preset_locations.keys() if prof_loc in k), None)
+            if match:
+                st.session_state["city_choice"] = match
+
+    # 1) Configuration and Location (Combined Layout)
     with st.container(border=True):
-        st.markdown("#### Choose period and selected date")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if "period_start" not in st.session_state: st.session_state["period_start"] = today - timedelta(days=15)
-            period_start = st.date_input("Period start", value=st.session_state["period_start"], min_value=min_date, max_value=today+timedelta(days=1), key="p_start_input")
-        with c2:
-            if "period_end" not in st.session_state: st.session_state["period_end"] = today
-            period_end = st.date_input("Period end", value=st.session_state["period_end"], min_value=min_date, max_value=today+timedelta(days=1), key="p_end_input")
-        with c3:
-            selected_day = st.date_input("Selected day for analysis", value=st.session_state["day"], key="day")
-
-    st.markdown("<div style='height: 0.25rem;'></div>", unsafe_allow_html=True)
-
-    # 2) Location Selection (Card Layout)
-    with st.container(border=True):
-        st.markdown("#### Location Selection")
-        col_loc_in, col_loc_map = st.columns([1, 1])
-        
-        preset_locations = {
-            "Aalborg (DK1)":    {"lat": 57.0488, "lon": 9.9217,  "area": "DK1"},
-            "Aarhus (DK1)":     {"lat": 56.1629, "lon": 10.2039, "area": "DK1"},
-            "Odense (DK1)":     {"lat": 55.4038, "lon": 10.4024, "area": "DK1"},
-            "Copenhagen (DK2)": {"lat": 55.6761, "lon": 12.5683, "area": "DK2"},
-        }
-
-        if "city_choice" not in st.session_state and "user_profile" in st.session_state:
-            prof_loc = st.session_state["user_profile"].get("location")
-            if prof_loc:
-                # Find the first preset that contains the user's city name
-                match = next((k for k in preset_locations.keys() if prof_loc in k), None)
-                if match:
-                    st.session_state["city_choice"] = match
-
-        with col_loc_in:
-            choice = st.selectbox("Choose city", list(preset_locations.keys()), key="city_choice")
-            preset = preset_locations[choice]
-            st.session_state["geo_lat"] = preset["lat"]
-            st.session_state["geo_lon"] = preset["lon"]
-            st.session_state["price_area"] = preset["area"]
+        col_set, col_map = st.columns([1.5, 1])
+        with col_set:
+            st.markdown("<h4 style='margin-bottom: 0.2rem;'>Scenario Configuration</h4>", unsafe_allow_html=True)
+            c1, c2 = st.columns(2)
+            with c1:
+                if "period_start" not in st.session_state: st.session_state["period_start"] = today - timedelta(days=15)
+                period_start = st.date_input("Period start", value=st.session_state["period_start"], min_value=min_date, max_value=today+timedelta(days=1), key="p_start_input")
+                selected_day = st.date_input("Selected day", value=st.session_state["day"], key="day")
+            with c2:
+                if "period_end" not in st.session_state: st.session_state["period_end"] = today
+                period_end = st.date_input("Period end", value=st.session_state["period_end"], min_value=min_date, max_value=today+timedelta(days=1), key="p_end_input")
+                choice = st.selectbox("Choose city", list(preset_locations.keys()), key="city_choice")
+                preset = preset_locations[choice]
+                st.session_state["geo_lat"] = preset["lat"]
+                st.session_state["geo_lon"] = preset["lon"]
+                st.session_state["price_area"] = preset["area"]
             
-            st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 0.25rem;'></div>", unsafe_allow_html=True)
             fetch_btn = st.button("Fetch Data", width="stretch", type="primary")
 
-        with col_loc_map:
+        with col_map:
             df_map = pd.DataFrame({"lat": [st.session_state["geo_lat"]], "lon": [st.session_state["geo_lon"]]})
-            st.map(df_map, zoom=6)
+            try:
+                st.map(df_map, zoom=5, height=220)
+            except TypeError:
+                st.map(df_map, zoom=5)
 
     # --- Data Fetching Logic ---
     if period_end < period_start:
