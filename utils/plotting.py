@@ -33,7 +33,7 @@ def plot_period_minute(
             hovermode="x unified",
             height=height,
             margin=dict(l=20, r=20, t=30, b=80),
-            legend=dict(orientation="h", yanchor="top", y=-0.55, xanchor="center", x=0.5)
+            legend=dict(orientation="h", yanchor="top", y=-0.85, xanchor="center", x=0.5)
         )
         return fig
 
