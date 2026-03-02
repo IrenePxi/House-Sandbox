@@ -32,8 +32,8 @@ def plot_period_minute(
             yaxis_title=ytitle,
             hovermode="x unified",
             height=height,
-            margin=dict(l=20, r=20, t=30, b=50),
-            legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="center", x=0.5)
+            margin=dict(l=20, r=20, t=30, b=80),
+            legend=dict(orientation="h", yanchor="top", y=-0.35, xanchor="center", x=0.5)
         )
         return fig
 
@@ -108,8 +108,8 @@ def plot_period_bar(
             xaxis_title="Time", 
             yaxis_title=ytitle,
             height=height,
-            margin=dict(l=20, r=20, t=30, b=50),
-            legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="center", x=0.5)
+            margin=dict(l=20, r=20, t=30, b=80),
+            legend=dict(orientation="h", yanchor="top", y=-0.35, xanchor="center", x=0.5)
         )
         return fig
 
