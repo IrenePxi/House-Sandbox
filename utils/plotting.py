@@ -13,7 +13,8 @@ def plot_period_minute(
     series: pd.Series,
     selected_day: date | None,
     title: str,
-    ytitle: str
+    ytitle: str,
+    height: int = 250
 ) -> go.Figure:
     """
     Plot a minute-level time series for an arbitrary period and highlight one selected day
@@ -30,6 +31,8 @@ def plot_period_minute(
             xaxis_title="Time",
             yaxis_title=ytitle,
             hovermode="x unified",
+            height=height,
+            margin=dict(l=20, r=20, t=30, b=20),
         )
         return fig
 
@@ -77,6 +80,8 @@ def plot_period_minute(
         xaxis_title="Time",
         yaxis_title=ytitle,
         hovermode="x unified",
+        height=height,
+        margin=dict(l=20, r=20, t=30, b=20),
     )
 
     return fig
@@ -87,6 +92,7 @@ def plot_period_bar(
     title: str,
     ytitle: str,
     bar_opacity: float = 0.8,
+    height: int = 250
 ) -> go.Figure:
     """
     Plot a bar chart over a raw time series (minute/5-min/15-min/hourly).
@@ -95,7 +101,13 @@ def plot_period_bar(
     fig = go.Figure()
 
     if series is None or series.empty:
-        fig.update_layout(title=title, xaxis_title="Time", yaxis_title=ytitle)
+        fig.update_layout(
+            title=title, 
+            xaxis_title="Time", 
+            yaxis_title=ytitle,
+            height=height,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
         return fig
 
     s = series.copy()
@@ -152,6 +164,8 @@ def plot_period_bar(
         yaxis_title=ytitle,
         barmode="overlay",
         hovermode="x unified",
+        height=height,
+        margin=dict(l=20, r=20, t=30, b=20),
     )
 
     return fig

@@ -46,7 +46,7 @@ def render_scenario_page():
         with c3:
             selected_day = st.date_input("Selected day for analysis", value=st.session_state["day"], key="day")
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 0.25rem;'></div>", unsafe_allow_html=True)
 
     # 2) Location Selection (Card Layout)
     with st.container(border=True):
@@ -75,7 +75,7 @@ def render_scenario_page():
             st.session_state["geo_lon"] = preset["lon"]
             st.session_state["price_area"] = preset["area"]
             
-            st.markdown("<br><br>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
             fetch_btn = st.button("Fetch Data", width="stretch", type="primary")
 
         with col_loc_map:
@@ -115,25 +115,30 @@ def render_scenario_page():
     if not price_series.empty and not co2_series.empty and not temp_series.empty:
         st.markdown("### Historical Trends")
         
-        with st.container(border=True):
-            st.markdown("#### Electricity Market Prices")
-            fig_price = plot_period_bar(price_series, selected_day=selected_day, title="", ytitle="DKK/kWh")
-            st.plotly_chart(fig_price, width="stretch")
-            if st.session_state.get("note_price"): st.caption(st.session_state["note_price"])
+        c_price, c_co2, c_temp = st.columns(3)
+        
+        with c_price:
+            with st.container(border=True):
+                st.markdown("#### Electricity Market Prices")
+                fig_price = plot_period_bar(price_series, selected_day=selected_day, title="", ytitle="DKK/kWh")
+                st.plotly_chart(fig_price, use_container_width=True)
+                if st.session_state.get("note_price"): st.caption(st.session_state["note_price"])
 
-        with st.container(border=True):
-            st.markdown("#### Carbon Intensity")
-            fig_co2 = plot_period_bar(co2_series, selected_day=selected_day, title="", ytitle="gCO₂/kWh")
-            st.plotly_chart(fig_co2, width="stretch")
-            if st.session_state.get("note_co2"): st.caption(st.session_state["note_co2"])
+        with c_co2:
+            with st.container(border=True):
+                st.markdown("#### Carbon Intensity")
+                fig_co2 = plot_period_bar(co2_series, selected_day=selected_day, title="", ytitle="gCO₂/kWh")
+                st.plotly_chart(fig_co2, use_container_width=True)
+                if st.session_state.get("note_co2"): st.caption(st.session_state["note_co2"])
 
-        with st.container(border=True):
-            st.markdown("#### Ambient Temperature")
-            fig_temp = plot_period_minute(temp_series, selected_day=selected_day, title="", ytitle="°C")
-            st.plotly_chart(fig_temp, width="stretch")
-            if st.session_state.get("note_temp"): st.caption(st.session_state["note_temp"])
+        with c_temp:
+            with st.container(border=True):
+                st.markdown("#### Ambient Temperature")
+                fig_temp = plot_period_minute(temp_series, selected_day=selected_day, title="", ytitle="°C")
+                st.plotly_chart(fig_temp, use_container_width=True)
+                if st.session_state.get("note_temp"): st.caption(st.session_state["note_temp"])
 
-    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
     
     _, col_btn, _ = st.columns([1.2, 1, 1.2])
     with col_btn:
