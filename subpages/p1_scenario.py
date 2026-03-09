@@ -148,7 +148,11 @@ def render_scenario_page():
                 st.markdown("#### Ambient Temperature")
                 fig_temp = plot_period_minute(temp_series, selected_day=selected_day, title="", ytitle="°C")
                 st.plotly_chart(fig_temp, use_container_width=True)
-                if st.session_state.get("note_temp"): st.caption(st.session_state["note_temp"])
+                note_t = st.session_state.get("note_temp")
+                if note_t and "No temperature data" in note_t:
+                    st.warning("⚠️ Weather data temporarily unavailable — open-meteo.com may be rate-limiting requests. Showing a placeholder curve. Try clicking Fetch Data again in a moment.")
+                elif note_t:
+                    st.caption(note_t)
 
     st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
     

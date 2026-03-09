@@ -3,12 +3,14 @@ Weather data fetching from Open-Meteo.
 Moved from app.py lines 352-425 — NO LOGIC CHANGES.
 """
 from __future__ import annotations
+import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
 import certifi
 import warnings
 
+@st.cache_data(ttl=7200, show_spinner=False)
 def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
                              tz: str = "Europe/Copenhagen") -> pd.DataFrame:
     """
@@ -25,12 +27,25 @@ def fetch_weather_open_meteo(lat: float, lon: float, start_date, end_date,
             f"&timezone={tz.replace('/', '%2F')}"
         )
         try:
-            r = requests.get(url, timeout=40, verify=certifi.where())
+            r = requests.get(url, timeout=(5, 30), verify=certifi.where())
             r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if r.status_code == 429:
+                warnings.warn(f"Open-Meteo rate limit (429) for {base_url}. Try again shortly.")
+            else:
+                warnings.warn(f"HTTP error from {base_url}: {e}")
+            return pd.DataFrame()
         except requests.exceptions.SSLError:
             warnings.warn(f"SSL verification failed for {base_url}. Retrying without verification.")
-            r = requests.get(url, timeout=40, verify=False)
-            r.raise_for_status()
+            try:
+                r = requests.get(url, timeout=(5, 30), verify=False)
+                r.raise_for_status()
+            except Exception as e:
+                warnings.warn(f"Weather fetch failed after SSL retry: {e}")
+                return pd.DataFrame()
+        except Exception as e:
+            warnings.warn(f"Weather fetch failed for {base_url}: {e}")
+            return pd.DataFrame()
         h = r.json().get("hourly", {})
         if not h: return pd.DataFrame()
         df = pd.DataFrame(h).rename(columns={
