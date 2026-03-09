@@ -98,7 +98,16 @@ def render_scenario_page():
                 st.session_state["note_price"] = note_price
                 st.session_state["note_co2"] = note_co2
                 st.session_state["note_temp"] = note_temp
-                st.success("Data synchronization complete.")
+
+                # Detect if energidataservice.dk was unreachable
+                eds_unavailable = (
+                    note_price and "No day-ahead price data" in note_price and
+                    note_co2 and "No CO\u2082 data from EnergiDataService" in note_co2
+                )
+                if eds_unavailable:
+                    st.warning("⚠️ Data source unavailable — energidataservice.dk could not be reached. Electricity prices and CO\u2082 data are showing placeholder curves. Weather data may still be available. Try again later.")
+                else:
+                    st.success("Data synchronization complete.")
 
     st.markdown("---")
 
@@ -117,14 +126,22 @@ def render_scenario_page():
                 st.markdown("#### Electricity Market Prices")
                 fig_price = plot_period_bar(price_series, selected_day=selected_day, title="", ytitle="DKK/kWh")
                 st.plotly_chart(fig_price, use_container_width=True)
-                if st.session_state.get("note_price"): st.caption(st.session_state["note_price"])
+                note_p = st.session_state.get("note_price")
+                if note_p and "No day-ahead price data" in note_p:
+                    st.caption("⚠️ Data source unavailable — energidataservice.dk could not be reached. Showing placeholder curve.")
+                elif note_p:
+                    st.caption(note_p)
 
         with c_co2:
             with st.container(border=True):
                 st.markdown("#### Carbon Intensity")
-                fig_co2 = plot_period_bar(co2_series, selected_day=selected_day, title="", ytitle="gCO₂/kWh")
+                fig_co2 = plot_period_bar(co2_series, selected_day=selected_day, title="", ytitle="gCO\u2082/kWh")
                 st.plotly_chart(fig_co2, use_container_width=True)
-                if st.session_state.get("note_co2"): st.caption(st.session_state["note_co2"])
+                note_c = st.session_state.get("note_co2")
+                if note_c and "No CO\u2082 data from EnergiDataService" in note_c:
+                    st.caption("⚠️ Data source unavailable — energidataservice.dk could not be reached. Showing placeholder curve.")
+                elif note_c:
+                    st.caption(note_c)
 
         with c_temp:
             with st.container(border=True):
